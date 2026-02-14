@@ -3,8 +3,8 @@ import L from "leaflet";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import "leaflet-routing-machine";
-import scooter from "../assets/scooter.png";
-import home from "../assets/house.png";
+import scooter from "../public/scooter.png";
+import home from "../public/house.png";
 
 const delivererIcon = new L.Icon({
   iconUrl: scooter,
