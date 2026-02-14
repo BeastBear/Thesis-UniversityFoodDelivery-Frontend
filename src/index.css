@@ -1,0 +1,252 @@
+@import "tailwindcss";
+
+@theme {
+  /* Modern Design System - Food Delivery App */
+
+  /* Primary Brand Color - Vibrant Orange */
+  --color-primary: #ff6b00;
+  --color-primary-dark: #e55a00;
+  --color-primary-light: #ff8c42;
+  --color-primary-bg: #fff5f2;
+  --color-primary-bg-light: #ffede8;
+  --color-primary-border: #ffd4c4;
+  --color-primary-shadow: rgba(255, 107, 0, 0.2);
+  --color-primary-shadow-light: rgba(255, 107, 0, 0.1);
+
+  /* UniEats Design System - Role-based Primary Colors */
+  --color-primary-orange: #ff6b00; /* Customer */
+  --color-primary-green: #10b981; /* Owner */
+  --color-primary-blue: #3b82f6; /* Rider */
+  --color-primary-purple: #8b5cf6; /* Admin */
+
+  /* Legacy compatibility */
+  --theme-name: orange;
+
+  /* Status Colors */
+  --color-success: #10b981;
+  --color-success-bg: #d1fae5;
+  --color-success-text: #065f46;
+
+  --color-pending: #f59e0b;
+  --color-pending-bg: #fef3c7;
+  --color-pending-text: #92400e;
+
+  --color-error: #ef4444;
+  --color-error-bg: #fee2e2;
+  --color-error-text: #991b1b;
+
+  --color-info: #3b82f6;
+  --color-info-bg: #dbeafe;
+  --color-info-text: #1e40af;
+
+  /* Background & Surface Colors */
+  --color-bg-main: #ffffff;
+  --color-bg-secondary: #ffffff;
+  --color-surface: #ffffff;
+  --color-surface-hover: #fafafa;
+
+  /* Text Colors */
+  --color-text-headings: #111827;
+  --color-text-body: #374151;
+  --color-text-secondary: #6b7280;
+  --color-text-muted: #9ca3af;
+
+  /* Border & Divider */
+  --color-border: #e5e7eb;
+  --color-border-light: #ffffff;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl:
+    0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --shadow-premium: 0 10px 40px -10px rgba(0, 0, 0, 0.08);
+  --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+
+  /* Typography - Clean Sans-serif */
+  --font-family:
+    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Kanit",
+    sans-serif;
+
+  /* Spacing & Radius */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.25rem;
+  --radius-2xl: 1.5rem;
+  --radius-3xl: 1.5rem; /* For cards */
+  --radius-4xl: 2rem; /* For outer containers */
+}
+
+body {
+  background-color: var(--color-bg-main);
+  font-family: var(--font-family);
+  color: var(--color-text-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Glassmorphism Utility */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+/* Dynamic Theme Hover Utilities */
+.theme-hover {
+  transition:
+    color 0.2s,
+    background-color 0.2s;
+}
+
+.theme-hover:hover {
+  color: var(--color-primary);
+  background-color: var(--color-primary-bg-light);
+}
+
+.theme-button {
+  background-color: var(--color-primary);
+  box-shadow: 0 10px 25px -5px var(--color-primary-shadow);
+  transition:
+    background-color 0.2s,
+    transform 0.2s;
+}
+
+.theme-button:hover {
+  background-color: var(--color-primary-dark);
+}
+
+.theme-nav-item {
+  transition:
+    background-color 0.2s,
+    color 0.2s;
+}
+
+.theme-nav-item:not(.active):hover {
+  background-color: var(--color-primary-bg-light);
+  color: var(--color-primary);
+}
+
+.theme-nav-item.active {
+  background-color: var(--color-primary);
+  color: white;
+  box-shadow: 0 10px 25px -5px var(--color-primary-shadow);
+}
+
+.theme-nav-icon:not(.active-icon):hover {
+  color: var(--color-primary);
+}
+
+/* Toggle Switch Theme */
+.theme-toggle {
+  background-color: #e5e7eb;
+  transition: background-color 0.2s;
+}
+
+.theme-toggle:checked {
+  background-color: var(--color-primary);
+}
+
+.theme-toggle:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px var(--color-primary-shadow-light);
+}
+
+/* Tab Button Theme */
+.theme-tab {
+  transition: all 0.2s;
+}
+
+.theme-tab.active {
+  background-color: var(--color-primary);
+  color: white;
+  box-shadow: 0 10px 25px -5px var(--color-primary-shadow);
+}
+
+/* Custom styles for react-time-picker (Preserved & Enhanced) */
+.time-picker-custom .react-time-picker__wrapper {
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem; /* rounded-xl */
+  padding: 0.5rem 1rem;
+  background-color: white;
+  box-shadow: var(--shadow-soft);
+  transition: all 0.2s;
+}
+
+.time-picker-custom .react-time-picker__wrapper:hover {
+  border-color: var(--color-primary-orange);
+}
+
+.time-picker-custom .react-time-picker__wrapper:focus-within {
+  border-color: var(--color-primary-orange);
+  box-shadow: 0 0 0 3px rgba(255, 77, 45, 0.1);
+}
+
+.time-picker-custom .react-time-picker__inputGroup {
+  min-width: 80px;
+}
+
+.time-picker-custom .react-time-picker__inputGroup__input {
+  font-size: 0.95rem;
+  color: var(--color-text-headings);
+  font-weight: 500;
+  padding: 0.125rem;
+}
+
+.time-picker-custom .react-time-picker__inputGroup__divider {
+  color: var(--color-text-secondary);
+  margin: 0 0.25rem;
+}
+
+.time-picker-custom .react-time-picker__button {
+  padding: 0.25rem;
+  color: var(--color-text-secondary);
+  transition: color 0.2s;
+}
+
+.time-picker-custom .react-time-picker__button:hover {
+  color: var(--color-primary-orange);
+}
+
+.time-picker-custom .react-time-picker__clock {
+  width: 220px;
+  height: 220px;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: 0.75rem;
+  z-index: 50;
+  background: white;
+  border-radius: 1rem;
+  box-shadow: var(--shadow-premium);
+  padding: 1rem;
+}
