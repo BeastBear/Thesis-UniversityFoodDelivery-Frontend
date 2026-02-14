@@ -3,17 +3,16 @@ import L from "leaflet";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import "leaflet-routing-machine";
-import scooter from "../public/scooter.png";
-import home from "../public/house.png";
+
 
 const delivererIcon = new L.Icon({
-  iconUrl: scooter,
+  iconUrl: "/scooter.png",
   iconSize: [40, 40],
   iconAnchor: [20, 40],
 });
 
 const customerIcon = new L.Icon({
-  iconUrl: home,
+  iconUrl: "/house.png",
   iconSize: [40, 40],
   iconAnchor: [20, 40],
 });
