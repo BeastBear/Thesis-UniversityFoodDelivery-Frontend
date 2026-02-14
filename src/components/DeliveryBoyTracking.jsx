@@ -4,7 +4,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import "leaflet-routing-machine";
 import scooter from "../assets/scooter.png";
-import home from "../assets/home.png";
+import home from "../assets/house.png";
 
 const delivererIcon = new L.Icon({
   iconUrl: scooter,
