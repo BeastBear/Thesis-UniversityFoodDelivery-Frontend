@@ -642,6 +642,9 @@ function DeliveryBoy() {
     }
   };
 
+  const currentCredit = userData?.jobCredit ?? financialData.jobCredit ?? 0;
+  const isCreditLow = currentCredit < 300;
+
   return (
     <div>
       <div className="w-full max-w-[900px] mx-auto flex flex-col px-4 pt-3 sm:pt-6 gap-3 sm:gap-6 pb-28">
@@ -676,12 +679,15 @@ function DeliveryBoy() {
               <button
                 type="button"
                 onClick={toggleDuty}
+                disabled={isCreditLow}
                 aria-label={isOnDuty ? "Go Offline" : "Go Online"}
                 title={isOnDuty ? "Go Offline" : "Go Online"}
                 className={`min-h-[44px] px-4 rounded-2xl text-sm font-extrabold transition-colors border inline-flex items-center gap-2 ${
-                  isOnDuty
-                    ? "bg-red-50 text-red-700 border-red-200 hover:bg-red-100"
-                    : "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
+                  isCreditLow
+                    ? "bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed opacity-50"
+                    : isOnDuty
+                      ? "bg-red-50 text-red-700 border-red-200 hover:bg-red-100"
+                      : "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
                 }`}>
                 <RiShutDownLine size={18} />
               </button>
@@ -750,16 +756,12 @@ function DeliveryBoy() {
             )}
           </div>
 
-          {!isOnDuty &&
-            (userData?.jobCredit ?? financialData.jobCredit ?? 0) < 300 && (
-              <div className="mt-4 p-3 bg-amber-50 text-amber-800 rounded-2xl text-sm font-extrabold border border-amber-100">
-                Insufficient credit (฿
-                {(userData?.jobCredit ?? financialData.jobCredit ?? 0).toFixed(
-                  2,
-                )}
-                ) . Min ฿300 required.
-              </div>
-            )}
+          {isCreditLow && (
+            <div className="mt-4 p-3 bg-amber-50 text-amber-800 rounded-2xl text-sm font-extrabold border border-amber-100">
+              Insufficient credit (฿{currentCredit.toFixed(2)}) . Min ฿300
+              required.
+            </div>
+          )}
         </div>
 
         {currentOrder && (
