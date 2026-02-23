@@ -484,9 +484,9 @@ function OrderDetail() {
                           {formatSelectedOptions(item.selectedOptions)}
                         </div>
                       )}
-                    {item.additionalRequest && (
+                    {item.specialInstructions && (
                       <p className="text-xs text-gray-500 mt-1 italic">
-                        "{item.additionalRequest}"
+                        "{item.specialInstructions}"
                       </p>
                     )}
                   </div>
@@ -655,9 +655,9 @@ function OrderDetail() {
                           {formatSelectedOptions(item.selectedOptions)}
                         </div>
                       )}
-                    {item.additionalRequest && (
+                    {item.specialInstructions && (
                       <p className="text-xs text-gray-500 mt-1 italic">
-                        Note: {item.additionalRequest}
+                        Note: {item.specialInstructions}
                       </p>
                     )}
                   </div>

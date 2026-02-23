@@ -340,11 +340,11 @@ const AdminOrders = () => {
                               {it?.quantity || 0}
                             </span>
                           </div>
-                          {it?.additionalRequest ? (
+                          {it?.specialInstructions ? (
                             <div className="text-xs text-gray-500 mt-1">
                               Note:{" "}
                               <span className="font-bold">
-                                {it.additionalRequest}
+                                {it.specialInstructions}
                               </span>
                             </div>
                           ) : null}

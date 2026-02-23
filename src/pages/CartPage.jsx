@@ -650,6 +650,11 @@ function CartPage() {
                                 ? formatSelectedOptions(item.selectedOptions)
                                 : item.description || ""}
                             </p>
+                            {item.specialInstructions && (
+                              <p className="text-xs text-gray-500 mt-1 italic">
+                                Note: {item.specialInstructions}
+                              </p>
+                            )}
                           </div>
                           <span className="font-extrabold text-gray-900 text-sm shrink-0">
                             ฿

@@ -236,9 +236,9 @@ const ActiveOrderPanel = ({
                             {formatSelectedOptions(it.selectedOptions)}
                           </div>
                         )}
-                      {it?.additionalRequest && (
+                      {it?.specialInstructions && (
                         <div className="mt-1 text-xs text-gray-500 italic">
-                          Note: {it.additionalRequest}
+                          Note: {it.specialInstructions}
                         </div>
                       )}
                     </div>
@@ -278,9 +278,9 @@ const ActiveOrderPanel = ({
                               {formatSelectedOptions(it.selectedOptions)}
                             </div>
                           )}
-                        {it?.additionalRequest && (
+                        {it?.specialInstructions && (
                           <div className="mt-1 text-xs text-gray-500 italic">
-                            Note: {it.additionalRequest}
+                            Note: {it.specialInstructions}
                           </div>
                         )}
                       </div>

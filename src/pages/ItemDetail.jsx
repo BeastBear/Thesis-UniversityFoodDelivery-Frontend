@@ -25,7 +25,7 @@ function ItemDetail() {
   const [quantity, setQuantity] = useState(1);
   const [selectedOptions, setSelectedOptions] = useState({});
   const [totalPrice, setTotalPrice] = useState(0);
-  const [specialRequest, setSpecialRequest] = useState("");
+  const [specialInstructions, setSpecialInstructions] = useState("");
   const [shopOpen, setShopOpen] = useState(true);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
@@ -240,7 +240,7 @@ function ItemDetail() {
       image: item.image,
       shop: item.shop,
       selectedOptions,
-      specialRequest,
+      specialInstructions,
     };
     dispatch(addToCart(itemToAdd));
     navigate(-1);
@@ -543,8 +543,8 @@ function ItemDetail() {
                 Instructions
               </h3>
               <textarea
-                value={specialRequest}
-                onChange={(e) => setSpecialRequest(e.target.value)}
+                value={specialInstructions}
+                onChange={(e) => setSpecialInstructions(e.target.value)}
                 placeholder="E.g. No spicy, less sugar..."
                 className="w-full bg-white border border-gray-200 rounded-xl p-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary-orange/20 focus:border-primary-orange transition-all resize-none"
                 rows="3"></textarea>

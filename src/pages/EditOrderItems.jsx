@@ -154,7 +154,7 @@ function EditOrderItems() {
         price: item.price,
         quantity: 1,
         selectedOptions: {},
-        additionalRequest: "",
+        specialInstructions: "",
       };
       setEditedItems([...editedItems, newItem]);
     }
@@ -201,7 +201,7 @@ function EditOrderItems() {
             price: item.price,
             quantity: item.quantity,
             selectedOptions: item.selectedOptions || {},
-            additionalRequest: item.additionalRequest || "",
+            specialInstructions: item.specialInstructions || "",
           })),
           subtotal: newSubtotal,
         },
@@ -354,9 +354,9 @@ function EditOrderItems() {
                       </div>
                     )}
                   {/* Display additional request if available */}
-                  {item.additionalRequest && (
+                  {item.specialInstructions && (
                     <p className="text-sm text-gray-600 mt-1 italic">
-                      Note: {item.additionalRequest}
+                      Note: {item.specialInstructions}
                     </p>
                   )}
                 </div>
