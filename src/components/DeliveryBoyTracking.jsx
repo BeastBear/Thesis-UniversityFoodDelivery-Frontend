@@ -4,7 +4,6 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import "leaflet-routing-machine";
 
-
 const delivererIcon = new L.Icon({
   iconUrl: "/scooter.png",
   iconSize: [40, 40],
@@ -27,7 +26,7 @@ function Routing({ from, to }) {
     // For production, set up your own OSRM server or use a paid routing service
     const routingServiceUrl =
       import.meta.env.VITE_ROUTING_SERVICE_URL ||
-      "https://router.project-osrm.org/route/v1";
+      "https://routing.openstreetmap.de/routed-car/route/v1";
 
     const routingControl = L.Routing.control({
       router: L.Routing.osrmv1({
