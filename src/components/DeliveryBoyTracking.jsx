@@ -32,6 +32,7 @@ function Routing({ from, to }) {
       router: L.Routing.osrmv1({
         serviceUrl: routingServiceUrl,
         profile: "driving",
+        useHints: false,
       }),
       waypoints: [L.latLng(from[0], from[1]), L.latLng(to[0], to[1])],
       lineOptions: { styles: [{ color: "green", weight: 4 }] },
