@@ -100,6 +100,18 @@ const DeliveryMap = ({
     ? [deliveryBoyLocation.lat, deliveryBoyLocation.lon]
     : [13.7563, 100.5018]; // Bangkok default
 
+  const delivererMarkerRef = useRef(null);
+
+  // Update marker position dynamically
+  useEffect(() => {
+    if (deliveryBoyLocation && delivererMarkerRef.current) {
+      delivererMarkerRef.current.setLatLng([
+        deliveryBoyLocation.lat,
+        deliveryBoyLocation.lon,
+      ]);
+    }
+  }, [deliveryBoyLocation]);
+
   return (
     <div className="w-full h-full relative z-0">
       <MapContainer
@@ -115,6 +127,7 @@ const DeliveryMap = ({
         {/* Delivery Boy Marker */}
         {deliveryBoyLocation && (
           <Marker
+            ref={delivererMarkerRef}
             position={[deliveryBoyLocation.lat, deliveryBoyLocation.lon]}
             icon={scooterIcon}>
             <Popup>You</Popup>

@@ -63,6 +63,29 @@ function DeliveryBoyTracking({ data }) {
   const customerLat = data?.customerLocation?.lat;
   const customerLon = data?.customerLocation?.lon;
 
+  const delivererMarkerRef = React.useRef(null);
+  const customerMarkerRef = React.useRef(null);
+
+  React.useEffect(() => {
+    if (
+      delivererLat != null &&
+      delivererLon != null &&
+      delivererMarkerRef.current
+    ) {
+      delivererMarkerRef.current.setLatLng([delivererLat, delivererLon]);
+    }
+  }, [delivererLat, delivererLon]);
+
+  React.useEffect(() => {
+    if (
+      customerLat != null &&
+      customerLon != null &&
+      customerMarkerRef.current
+    ) {
+      customerMarkerRef.current.setLatLng([customerLat, customerLon]);
+    }
+  }, [customerLat, customerLon]);
+
   if (
     delivererLat == null ||
     delivererLon == null ||
@@ -88,10 +111,16 @@ function DeliveryBoyTracking({ data }) {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
-        <Marker position={[delivererLat, delivererLon]} icon={delivererIcon}>
+        <Marker
+          ref={delivererMarkerRef}
+          position={[delivererLat, delivererLon]}
+          icon={delivererIcon}>
           <Popup>Deliverer</Popup>
         </Marker>
-        <Marker position={[customerLat, customerLon]} icon={customerIcon}>
+        <Marker
+          ref={customerMarkerRef}
+          position={[customerLat, customerLon]}
+          icon={customerIcon}>
           <Popup>Customer</Popup>
         </Marker>
 
