@@ -25,38 +25,52 @@ function Verify() {
     useState(false);
   const [ownerVerification, setOwnerVerification] = useState(null);
 
-  const [verificationForm, setVerificationForm] = useState({
-    idNumber: "",
-    restaurantName: "",
-    cafeteria: "",
-    restaurantNumber: "",
-    restaurantDescription: "",
+  const [verificationForm, setVerificationForm] = useState(() => {
+    const saved = localStorage.getItem("verificationForm");
+    if (saved) return JSON.parse(saved);
+    return {
+      idNumber: "",
+      restaurantName: "",
+      cafeteria: "",
+      restaurantLotNumber: "",
+      restaurantDescription: "",
+    };
   });
 
   const [verificationFiles, setVerificationFiles] = useState({
     restaurantPhoto: null,
   });
 
-  const [bankForm, setBankForm] = useState({
-    accountName: "",
-    bank: "",
-    accountNumber: "",
+  const [bankForm, setBankForm] = useState(() => {
+    const saved = localStorage.getItem("bankForm");
+    if (saved) return JSON.parse(saved);
+    return {
+      bank: "",
+      accountNumber: "",
+    };
   });
 
   useEffect(() => {
-    const verificationBank = ownerVerification?.bank;
-    const shopBank = myShopData?.ePaymentAccount;
-    setBankForm({
-      accountName: verificationBank?.accountName || shopBank?.accountName || "",
-      bank: verificationBank?.bank || shopBank?.bank || "",
-      accountNumber:
-        verificationBank?.accountNumber || shopBank?.accountNumber || "",
-    });
+    localStorage.setItem("verificationForm", JSON.stringify(verificationForm));
+  }, [verificationForm]);
+
+  useEffect(() => {
+    localStorage.setItem("bankForm", JSON.stringify(bankForm));
+  }, [bankForm]);
+
+  useEffect(() => {
+    if (!localStorage.getItem("bankForm")) {
+      const verificationBank = ownerVerification?.bank;
+      const shopBank = myShopData?.ePaymentAccount;
+      setBankForm({
+        bank: verificationBank?.bank || shopBank?.bank || "",
+        accountNumber:
+          verificationBank?.accountNumber || shopBank?.accountNumber || "",
+      });
+    }
   }, [
-    ownerVerification?.bank?.accountName,
     ownerVerification?.bank?.bank,
     ownerVerification?.bank?.accountNumber,
-    myShopData?.ePaymentAccount?.accountName,
     myShopData?.ePaymentAccount?.bank,
     myShopData?.ePaymentAccount?.accountNumber,
   ]);
@@ -85,13 +99,15 @@ function Verify() {
         }
 
         if (ov) {
-          setVerificationForm({
-            idNumber: ov.kyc?.idNumber || "",
-            restaurantName: ov.restaurant?.name || "",
-            cafeteria: ov.restaurant?.cafeteria || "",
-            restaurantNumber: ov.restaurant?.restaurantNumber || "",
-            restaurantDescription: ov.restaurant?.description || "",
-          });
+          if (!localStorage.getItem("verificationForm")) {
+            setVerificationForm({
+              idNumber: ov.kyc?.idNumber || "",
+              restaurantName: ov.restaurant?.name || "",
+              cafeteria: ov.restaurant?.cafeteria || "",
+              restaurantLotNumber: ov.restaurant?.restaurantLotNumber || "",
+              restaurantDescription: ov.restaurant?.description || "",
+            });
+          }
 
           if (ov.status === "verified" && !myShopData) {
             try {
@@ -130,7 +146,7 @@ function Verify() {
   };
 
   useEffect(() => {
-    if (ownerVerification) {
+    if (ownerVerification || localStorage.getItem("verificationForm")) {
       return;
     }
 
@@ -138,7 +154,8 @@ function Verify() {
       ...prev,
       restaurantName: prev.restaurantName || myShopData?.name || "",
       cafeteria: prev.cafeteria || myShopData?.cafeteria || "",
-      restaurantNumber: prev.restaurantNumber || myShopData?.shopNumber || "",
+      restaurantLotNumber:
+        prev.restaurantLotNumber || myShopData?.shopNumber || "",
       restaurantDescription:
         prev.restaurantDescription || myShopData?.note || "",
     }));
@@ -182,25 +199,11 @@ function Verify() {
   };
 
   const handleSubmitVerification = async () => {
-    const currentAccountName = (bankForm.accountName || "").trim();
-    const savedBank = ownerVerification?.bank || myShopData?.ePaymentAccount;
-    const savedAccountName = (savedBank?.accountName || "").trim();
-    const bankAccountName = currentAccountName;
-    const normalizedBank = bankAccountName.toLowerCase();
-    const normalizedFullName = (userData?.fullName || "").trim().toLowerCase();
+    const bankAccountName = userData?.fullName || "";
+    const bankName = bankForm.bank || "";
 
-    if (!bankAccountName) {
+    if (!bankName || !bankForm.accountNumber) {
       toast.error("Please complete Bank Account Details first.");
-      return;
-    }
-
-    if (!normalizedFullName) {
-      toast.error("Full Name is required.");
-      return;
-    }
-
-    if (normalizedFullName !== normalizedBank) {
-      toast.error("Full Name must match Bank Account Name.");
       return;
     }
 
@@ -209,10 +212,9 @@ function Verify() {
     fd.append("idNumber", verificationForm.idNumber);
     fd.append("restaurantName", verificationForm.restaurantName);
     fd.append("cafeteria", verificationForm.cafeteria);
-    fd.append("restaurantNumber", verificationForm.restaurantNumber);
+    fd.append("restaurantLotNumber", verificationForm.restaurantLotNumber);
     fd.append("restaurantDescription", verificationForm.restaurantDescription);
 
-    fd.append("bankAccountName", bankForm.accountName);
     fd.append("bankName", bankForm.bank);
     fd.append("bankAccountNumber", bankForm.accountNumber);
 
@@ -242,6 +244,8 @@ function Verify() {
           }),
         );
       }
+      localStorage.removeItem("verificationForm");
+      localStorage.removeItem("bankForm");
       toast.success(res.data?.message || "Verification submitted successfully");
     } catch (e) {
       toast.error(
@@ -273,23 +277,13 @@ function Verify() {
 
   const showStatusOnly = status === "pending" || status === "verified";
 
-  const bankAccountName = bankForm.accountName || "";
   const bankName = bankForm.bank || "";
   const bankAccountNumber = bankForm.accountNumber || "";
-  const hasBankInfo = !!bankAccountName && !!bankName && !!bankAccountNumber;
+  const hasBankInfo = !!bankName && !!bankAccountNumber;
 
   const hasRestaurantPhoto =
     !!verificationFiles.restaurantPhoto ||
     !!ownerVerification?.restaurant?.photo;
-
-  const normalizedFullName = (userData?.fullName || "").trim().toLowerCase();
-  const normalizedBankAccountName = (bankAccountName || "")
-    .trim()
-    .toLowerCase();
-  const nameMatchesBank =
-    normalizedFullName.length > 0 &&
-    normalizedBankAccountName.length > 0 &&
-    normalizedFullName === normalizedBankAccountName;
 
   const isStepValid = () => {
     if (step === 0) {
@@ -305,7 +299,7 @@ function Verify() {
       return (
         !!verificationForm.restaurantName.trim() &&
         !!verificationForm.cafeteria.trim() &&
-        !!verificationForm.restaurantNumber.trim() &&
+        !!verificationForm.restaurantLotNumber.trim() &&
         !!verificationForm.restaurantDescription.trim() &&
         hasRestaurantPhoto
       );
@@ -323,7 +317,7 @@ function Verify() {
       toast.error("Please complete all required fields in this section.");
       return;
     }
-    setStep((s) => Math.min(2, s + 1));
+    setStep((s) => Math.min(3, s + 1));
   };
 
   const handleBack = () => {
@@ -349,7 +343,11 @@ function Verify() {
         <Card className="p-6 rounded-lg border-gray-200">
           <div className="flex items-center justify-between gap-4">
             <div className="text-sm font-semibold text-gray-700">
-              {showStatusOnly ? "Verification Status" : `Step ${step + 1} / 3`}
+              {showStatusOnly
+                ? "Verification Status"
+                : step === 3
+                  ? "Summary"
+                  : `Step ${step + 1} / 3`}
             </div>
           </div>
 
@@ -574,15 +572,15 @@ function Verify() {
 
                       <div className="space-y-2">
                         <label className="text-sm font-medium text-gray-700">
-                          Restaurant Number
+                          Restaurant Lot. number
                         </label>
                         <input
                           type="text"
-                          name="restaurantNumber"
-                          value={verificationForm.restaurantNumber}
+                          name="restaurantLotNumber"
+                          value={verificationForm.restaurantLotNumber}
                           onChange={handleVerificationChange}
                           className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                          placeholder="Enter restaurant phone/number"
+                          placeholder="Enter restaurant lot number"
                         />
                       </div>
                     </div>
@@ -619,30 +617,35 @@ function Verify() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <div className="text-sm font-medium text-gray-700">
-                          Account Name
-                        </div>
-                        <input
-                          type="text"
-                          name="accountName"
-                          value={bankForm.accountName}
-                          onChange={handleBankChange}
-                          className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                          placeholder="Enter account name"
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <div className="text-sm font-medium text-gray-700">
                           Bank
                         </div>
-                        <input
-                          type="text"
+                        <select
                           name="bank"
                           value={bankForm.bank}
                           onChange={handleBankChange}
-                          className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                          placeholder="Enter bank"
-                        />
+                          className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-orange-500">
+                          <option value="">Select bank</option>
+                          <option value="KBANK">Kasikornbank (KBANK)</option>
+                          <option value="SCB">
+                            Siam Commercial Bank (SCB)
+                          </option>
+                          <option value="BBL">Bangkok Bank (BBL)</option>
+                          <option value="KTB">Krungthai Bank (KTB)</option>
+                          <option value="BAY">
+                            Bank of Ayudhya (Krungsri/BAY)
+                          </option>
+                          <option value="TTB">TMBThanachart Bank (TTB)</option>
+                          <option value="GSB">
+                            Government Savings Bank (GSB)
+                          </option>
+                          <option value="KKP">
+                            Kiatnakin Phatra Bank (KKP)
+                          </option>
+                          <option value="CIMBT">CIMB Thai Bank (CIMBT)</option>
+                          <option value="UOBBT">
+                            United Overseas Bank (UOB/UOBBT)
+                          </option>
+                        </select>
                       </div>
 
                       <div className="space-y-2">
@@ -661,6 +664,120 @@ function Verify() {
                     </div>
                   </div>
                 ) : null}
+
+                {step === 3 ? (
+                  <div className="space-y-4">
+                    <h2 className="text-lg font-semibold text-gray-900">
+                      Summary
+                    </h2>
+                    <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 space-y-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">
+                            Full Name
+                          </p>
+                          <p className="text-sm font-medium text-gray-900">
+                            {userData?.fullName || "—"}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">
+                            Email
+                          </p>
+                          <p className="text-sm font-medium text-gray-900">
+                            {userData?.email || "—"}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">
+                            Phone
+                          </p>
+                          <p className="text-sm font-medium text-gray-900">
+                            {userData?.mobile || "—"}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">
+                            ID / Passport
+                          </p>
+                          <p className="text-sm font-medium text-gray-900">
+                            {verificationForm.idNumber}
+                          </p>
+                        </div>
+                      </div>
+
+                      <hr className="border-gray-200" />
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">
+                            Restaurant Name
+                          </p>
+                          <p className="text-sm font-medium text-gray-900">
+                            {verificationForm.restaurantName}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">
+                            Cafeteria
+                          </p>
+                          <p className="text-sm font-medium text-gray-900">
+                            {verificationForm.cafeteria}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">
+                            Restaurant Lot. number
+                          </p>
+                          <p className="text-sm font-medium text-gray-900">
+                            {verificationForm.restaurantLotNumber}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">
+                            Restaurant Photo
+                          </p>
+                          <p className="text-sm font-medium text-gray-900">
+                            {verificationFiles.restaurantPhoto
+                              ? "File Selected"
+                              : ownerVerification?.restaurant?.photo
+                                ? "Uploaded"
+                                : "—"}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="w-full">
+                        <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">
+                          Description
+                        </p>
+                        <p className="text-sm font-medium text-gray-900 break-all">
+                          {verificationForm.restaurantDescription}
+                        </p>
+                      </div>
+
+                      <hr className="border-gray-200" />
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">
+                            Bank Name
+                          </p>
+                          <p className="text-sm font-medium text-gray-900">
+                            {bankForm.bank}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">
+                            Bank Account Number
+                          </p>
+                          <p className="text-sm font-medium text-gray-900">
+                            {bankForm.accountNumber}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
               </>
             ) : null}
           </div>
@@ -674,7 +791,7 @@ function Verify() {
               Back
             </button>
 
-            {showStatusOnly ? null : step < 2 ? (
+            {showStatusOnly ? null : step < 3 ? (
               <button
                 type="button"
                 onClick={handleContinue}
