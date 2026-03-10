@@ -608,10 +608,21 @@ function Verify() {
                         <h2 className="text-lg font-semibold text-gray-900">
                           Bank Info
                         </h2>
-                        <div className="text-sm text-gray-500 mt-1">
-                          Your bank account name must match your owner full name
-                        </div>
                       </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <div className="text-sm font-medium text-gray-700">
+                        Account Number
+                      </div>
+                      <input
+                        type="text"
+                        name="accountNumber"
+                        value={bankForm.accountNumber}
+                        onChange={handleBankChange}
+                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        placeholder="Enter account number"
+                      />
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -646,20 +657,6 @@ function Verify() {
                             United Overseas Bank (UOB/UOBBT)
                           </option>
                         </select>
-                      </div>
-
-                      <div className="space-y-2">
-                        <div className="text-sm font-medium text-gray-700">
-                          Account Number
-                        </div>
-                        <input
-                          type="text"
-                          name="accountNumber"
-                          value={bankForm.accountNumber}
-                          onChange={handleBankChange}
-                          className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                          placeholder="Enter account number"
-                        />
                       </div>
                     </div>
                   </div>
@@ -760,18 +757,18 @@ function Verify() {
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                           <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">
-                            Bank Name
-                          </p>
-                          <p className="text-sm font-medium text-gray-900">
-                            {bankForm.bank}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">
                             Bank Account Number
                           </p>
                           <p className="text-sm font-medium text-gray-900">
                             {bankForm.accountNumber}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">
+                            Bank Name
+                          </p>
+                          <p className="text-sm font-medium text-gray-900">
+                            {bankForm.bank}
                           </p>
                         </div>
                       </div>
