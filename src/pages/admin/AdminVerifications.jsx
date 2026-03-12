@@ -294,7 +294,7 @@ const AdminVerifications = () => {
                                   ?.cafeteria || "—"}
                                 <span className="mx-2 text-gray-300">|</span>
                                 {user.ownerVerification?.restaurant
-                                  ?.restaurantNumber || "—"}
+                                  ?.restaurantLotNumber || "—"}
                               </div>
                             </div>
                           </div>
@@ -584,10 +584,10 @@ const AdminVerifications = () => {
                           </div>
                           <div>
                             <span className="font-semibold text-gray-900">
-                              Number:
+                              Restaurant Lot. number:
                             </span>{" "}
                             {selectedUser.ownerVerification?.restaurant
-                              ?.restaurantNumber || "—"}
+                              ?.restaurantLotNumber || "—"}
                           </div>
                           <div>
                             <span className="font-semibold text-gray-900">
@@ -602,7 +602,6 @@ const AdminVerifications = () => {
                   </div>
 
                   {selectedUser.ownerVerification?.bank?.bank ||
-                  selectedUser.ownerVerification?.bank?.accountName ||
                   selectedUser.ownerVerification?.bank?.accountNumber ? (
                     <div className="rounded-2xl border border-gray-100 p-4">
                       <div className="text-xs font-bold text-gray-500 uppercase tracking-wider">
@@ -617,13 +616,6 @@ const AdminVerifications = () => {
                             Bank:
                           </span>{" "}
                           {selectedUser.ownerVerification?.bank?.bank || "—"}
-                        </div>
-                        <div>
-                          <span className="font-semibold text-gray-900">
-                            Account Name:
-                          </span>{" "}
-                          {selectedUser.ownerVerification?.bank?.accountName ||
-                            "—"}
                         </div>
                         <div>
                           <span className="font-semibold text-gray-900">

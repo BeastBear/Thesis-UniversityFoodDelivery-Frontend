@@ -23,7 +23,7 @@ const AdminLayout = () => {
   const location = useLocation();
   const dispatch = useDispatch();
   const { userData } = useSelector((state) => state.user);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
+
   const [isNotifOpen, setIsNotifOpen] = React.useState(false);
   const notifRef = React.useRef(null);
   const {
@@ -57,11 +57,6 @@ const AdminLayout = () => {
     { label: "Settings", icon: <FaCogs />, path: "/admin/settings" },
   ];
 
-  // Close mobile menu on route change
-  React.useEffect(() => {
-    setIsMobileMenuOpen(false);
-  }, [location.pathname]);
-
   React.useEffect(() => {
     if (!isNotifOpen) {
       return;
@@ -93,61 +88,6 @@ const AdminLayout = () => {
     <div className="min-h-screen bg-white/90">
       {/* Desktop Layout */}
       <div className="hidden md:flex min-h-screen">
-        {/* Left Sidebar Card */}
-        <div className="w-80 shrink-0 p-6">
-          <div className="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.06)] p-6 h-full flex flex-col sticky top-6">
-            {/* Brand Section */}
-            <div className="mb-8 pb-6 border-b-2 border-gray-100">
-              <div className="flex items-center gap-4 mb-3">
-                <div className="w-16 h-16 bg-purple-600 rounded-3xl flex items-center justify-center text-white font-black text-2xl shadow-lg">
-                  U
-                </div>
-                <div>
-                  <h1 className="text-2xl font-black text-gray-900">UniEats</h1>
-                  <div className="mt-1 px-3 py-1 bg-purple-600 text-white text-xs font-bold rounded-full inline-block">
-                    ADMIN
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Navigation Menu */}
-            <nav className="flex-1 space-y-3 overflow-y-auto">
-              {navItems.map((item, index) => {
-                const isActive =
-                  item.path === "/admin"
-                    ? location.pathname === "/admin"
-                    : location.pathname.startsWith(item.path);
-                return (
-                  <button
-                    key={index}
-                    type="button"
-                    onClick={() => navigate(item.path)}
-                    className={`w-full py-4 rounded-full font-bold text-lg shadow-lg active:scale-95 transition-all flex items-center justify-center gap-3 ${
-                      isActive
-                        ? "bg-purple-600 text-white"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                    }`}>
-                    <span className="text-xl">{item.icon}</span>
-                    <span>{item.label}</span>
-                  </button>
-                );
-              })}
-            </nav>
-
-            {/* Logout Button */}
-            <div className="mt-6 pt-6 border-t-2 border-gray-100">
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="w-full py-4 rounded-full font-bold text-lg shadow-lg active:scale-95 transition-all flex items-center justify-center gap-3 bg-red-50 text-red-600 hover:bg-red-100">
-                <FaSignOutAlt className="text-xl" />
-                <span>Sign Out</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col min-h-screen">
           {/* Top Header Card */}
@@ -310,86 +250,11 @@ const AdminLayout = () => {
 
       {/* Mobile Layout */}
       <div className="md:hidden flex flex-col min-h-screen">
-        {/* Mobile Overlay */}
-        {isMobileMenuOpen && (
-          <div
-            className="fixed inset-0 bg-black/50 z-40"
-            onClick={() => setIsMobileMenuOpen(false)}
-          />
-        )}
-
-        {/* Mobile Sidebar Card */}
-        <div
-          className={`fixed top-0 left-0 h-full w-80 bg-white rounded-r-3xl shadow-[0_8px_30px_rgb(0,0,0,0.06)] p-6 z-50 transform transition-transform duration-300 ${
-            isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
-          }`}>
-          <div className="h-full flex flex-col">
-            {/* Brand */}
-            <div className="mb-8 pb-6 border-b-2 border-gray-100">
-              <div className="flex items-center gap-4 mb-3">
-                <div className="w-16 h-16 bg-purple-600 rounded-3xl flex items-center justify-center text-white font-black text-2xl shadow-lg">
-                  V
-                </div>
-                <div>
-                  <h1 className="text-2xl font-black text-gray-900">UniEats</h1>
-                  <div className="mt-1 px-3 py-1 bg-purple-600 text-white text-xs font-bold rounded-full inline-block">
-                    ADMIN
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Navigation */}
-            <nav className="flex-1 space-y-3 overflow-y-auto">
-              {navItems.map((item, index) => {
-                const isActive =
-                  item.path === "/admin"
-                    ? location.pathname === "/admin"
-                    : location.pathname.startsWith(item.path);
-                return (
-                  <button
-                    key={index}
-                    type="button"
-                    onClick={() => {
-                      navigate(item.path);
-                      setIsMobileMenuOpen(false);
-                    }}
-                    className={`w-full py-4 rounded-full font-bold text-lg shadow-lg active:scale-95 transition-all flex items-center justify-center gap-3 ${
-                      isActive
-                        ? "bg-purple-600 text-white"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                    }`}>
-                    <span className="text-xl">{item.icon}</span>
-                    <span>{item.label}</span>
-                  </button>
-                );
-              })}
-            </nav>
-
-            {/* Logout */}
-            <div className="mt-6 pt-6 border-t-2 border-gray-100">
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="w-full py-4 rounded-full font-bold text-lg shadow-lg active:scale-95 transition-all flex items-center justify-center gap-3 bg-red-50 text-red-600 hover:bg-red-100">
-                <FaSignOutAlt className="text-xl" />
-                <span>Sign Out</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
         {/* Mobile Header Card */}
         <div className="p-4 pb-0">
           <div className="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.06)] p-4 mb-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => setIsMobileMenuOpen(true)}
-                  className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-700">
-                  <FaBars size={20} />
-                </button>
                 <h2 className="text-lg font-black text-gray-900">
                   {activeNavItem?.label || "Dashboard"}
                 </h2>
