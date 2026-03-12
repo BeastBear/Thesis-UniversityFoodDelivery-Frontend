@@ -420,12 +420,10 @@ const AdminVerifications = () => {
                       phone no.: {selectedUser.mobile || "—"}
                     </div>
                     <div className="mt-2 text-xs text-gray-400 font-mono">
+                      {tab === "deliverer" ? "ID Number: " : "User Id Number: "}
                       {tab === "deliverer"
-                        ? "Student ID Number: "
-                        : "User Id Number: "}
-                      {tab === "deliverer"
-                        ? selectedUser.deliveryVerification?.studentInfo
-                            ?.studentIdNumber || "—"
+                        ? selectedUser.deliveryVerification?.profile
+                            ?.idNumber || "—"
                         : selectedUser.ownerVerification?.kyc?.idNumber || "—"}
                     </div>
                   </div>
