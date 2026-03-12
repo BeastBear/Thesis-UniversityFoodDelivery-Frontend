@@ -554,18 +554,7 @@ const AdminVerifications = () => {
                     <div className="text-xs font-bold text-gray-500 uppercase tracking-wider">
                       Restaurant
                     </div>
-                    <div className="mt-4 flex items-start gap-5">
-                      {selectedUser.ownerVerification?.restaurant?.photo ? (
-                        <div className="w-36">
-                          <img
-                            src={
-                              selectedUser.ownerVerification.restaurant.photo
-                            }
-                            alt="Restaurant"
-                            className="w-36 h-28 rounded-2xl object-cover border border-gray-100"
-                          />
-                        </div>
-                      ) : null}
+                    <div className="mt-4 flex items-start">
                       <div className="min-w-0 flex-1">
                         <div className="text-base font-extrabold text-gray-900">
                           {selectedUser.ownerVerification?.restaurant?.name ||
