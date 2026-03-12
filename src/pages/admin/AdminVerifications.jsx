@@ -299,7 +299,7 @@ const AdminVerifications = () => {
                       ) : (
                         <div className="rounded-xl border border-gray-100 bg-white p-4 lg:col-span-2">
                           <div className="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                            User Id Number
+                            Student ID Number
                           </div>
                           <div className="mt-3 flex items-start gap-4">
                             {user.deliveryVerification?.documents
@@ -315,8 +315,8 @@ const AdminVerifications = () => {
                             ) : null}
                             <div className="min-w-0">
                               <div className="text-sm font-bold text-gray-900 truncate">
-                                {user.deliveryVerification?.profile?.idNumber ||
-                                  "—"}
+                                {user.deliveryVerification?.studentInfo
+                                  ?.studentIdNumber || "—"}
                               </div>
                               <div className="mt-2 text-xs text-gray-500">
                                 {user.deliveryVerification?.studentInfo
@@ -420,10 +420,12 @@ const AdminVerifications = () => {
                       phone no.: {selectedUser.mobile || "—"}
                     </div>
                     <div className="mt-2 text-xs text-gray-400 font-mono">
-                      User Id Number:{" "}
                       {tab === "deliverer"
-                        ? selectedUser.deliveryVerification?.profile
-                            ?.idNumber || "—"
+                        ? "Student ID Number: "
+                        : "User Id Number: "}
+                      {tab === "deliverer"
+                        ? selectedUser.deliveryVerification?.studentInfo
+                            ?.studentIdNumber || "—"
                         : selectedUser.ownerVerification?.kyc?.idNumber || "—"}
                     </div>
                   </div>
@@ -475,17 +477,7 @@ const AdminVerifications = () => {
                       Deliverer Verification
                     </div>
 
-                    <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-gray-700">
-                      <div className="rounded-xl border border-gray-100 bg-white p-3">
-                        <div className="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                          ID Number
-                        </div>
-                        <div className="mt-1 font-extrabold text-gray-900">
-                          {selectedUser.deliveryVerification?.profile
-                            ?.idNumber || "—"}
-                        </div>
-                      </div>
-
+                    <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm text-gray-700">
                       <div className="rounded-xl border border-gray-100 bg-white p-3">
                         <div className="text-xs font-bold text-gray-500 uppercase tracking-wider">
                           Student ID Number
