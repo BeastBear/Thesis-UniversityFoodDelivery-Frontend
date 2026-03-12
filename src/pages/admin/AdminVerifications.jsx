@@ -263,9 +263,6 @@ const AdminVerifications = () => {
                             <span className="mx-2 text-gray-300">|</span>
                             {user.mobile || "—"}
                           </div>
-                          <div className="mt-1 text-xs text-gray-400 font-mono">
-                            ID: {user._id}
-                          </div>
                         </div>
                       </div>
                     </div>
@@ -302,13 +299,33 @@ const AdminVerifications = () => {
                       ) : (
                         <div className="rounded-xl border border-gray-100 bg-white p-4 lg:col-span-2">
                           <div className="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                            Deliverer Verification
+                            User Id Number
                           </div>
-                          <div className="mt-2 text-xs text-gray-500">
-                            Submitted:{" "}
-                            {formatDateTime(
-                              user.deliveryVerification?.submittedAt,
-                            )}
+                          <div className="mt-3 flex items-start gap-4">
+                            {user.deliveryVerification?.documents
+                              ?.studentCard ? (
+                              <img
+                                src={
+                                  user.deliveryVerification.documents
+                                    .studentCard
+                                }
+                                alt="Student Card"
+                                className="w-16 h-16 rounded-xl object-cover border border-gray-100"
+                              />
+                            ) : null}
+                            <div className="min-w-0">
+                              <div className="text-sm font-bold text-gray-900 truncate">
+                                {user.deliveryVerification?.profile?.idNumber ||
+                                  "—"}
+                              </div>
+                              <div className="mt-2 text-xs text-gray-500">
+                                {user.deliveryVerification?.studentInfo
+                                  ?.faculty || "—"}
+                                <span className="mx-2 text-gray-300">|</span>
+                                {user.deliveryVerification?.studentInfo
+                                  ?.major || "—"}
+                              </div>
+                            </div>
                           </div>
                         </div>
                       )}
