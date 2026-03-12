@@ -398,12 +398,16 @@ const AdminVerifications = () => {
                       {selectedUser.fullName || "—"}
                     </div>
                     <div className="mt-1 text-sm text-gray-600">
-                      {selectedUser.email || "—"}
+                      email: {selectedUser.email || "—"}
                       <span className="mx-2 text-gray-300">|</span>
-                      {selectedUser.mobile || "—"}
+                      phone no.: {selectedUser.mobile || "—"}
                     </div>
                     <div className="mt-2 text-xs text-gray-400 font-mono">
-                      User ID: {selectedUser._id}
+                      User Id Number:{" "}
+                      {tab === "deliverer"
+                        ? selectedUser.deliveryVerification?.profile
+                            ?.idNumber || "—"
+                        : selectedUser.ownerVerification?.kyc?.idNumber || "—"}
                     </div>
                   </div>
                 </div>
@@ -430,14 +434,7 @@ const AdminVerifications = () => {
                           : selectedUser.ownerVerification?.submittedAt,
                       )}
                     </div>
-                    <div>
-                      Verified:{" "}
-                      {formatDateTime(
-                        tab === "deliverer"
-                          ? selectedUser.deliveryVerification?.verifiedAt
-                          : selectedUser.ownerVerification?.verifiedAt,
-                      )}
-                    </div>
+
                     {(
                       tab === "deliverer"
                         ? selectedUser.deliveryVerification?.rejectionReason

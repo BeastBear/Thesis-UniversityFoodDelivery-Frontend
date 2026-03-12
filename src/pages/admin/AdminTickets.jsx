@@ -46,13 +46,23 @@ const AdminTickets = () => {
     } catch (error) {}
   };
 
-  const filteredTickets = tickets.filter(
-    (ticket) =>
-      ticket.subject?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      ticket.category?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      ticket.priority?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      ticket._id?.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
+  const filteredTickets = tickets
+    .filter((ticket) => {
+      // Exclude verification tickets
+      const isVerificationCategory = ticket.category === "Verification";
+      const isVerificationSubject = ticket.subject
+        ?.toLowerCase()
+        .includes("verification request");
+
+      return !isVerificationCategory && !isVerificationSubject;
+    })
+    .filter(
+      (ticket) =>
+        ticket.subject?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        ticket.category?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        ticket.priority?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        ticket._id?.toLowerCase().includes(searchTerm.toLowerCase()),
+    );
 
   const priorityBadgeClass = (p) => {
     if (p === "High") return "bg-red-100 text-red-700";
