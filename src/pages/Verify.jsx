@@ -423,7 +423,7 @@ function Verify() {
                   </div>
                   <div className="text-sm text-gray-600 mt-1">
                     {status === "pending"
-                      ? "Please wait for admin review and call back to your number. You will be able to access owner features once approved."
+                      ? "Please wait for admin review and then we will call you back to your number. You will be able to access owner features once approved."
                       : "You can now proceed to create and manage your restaurant."}
                   </div>
                 </div>
