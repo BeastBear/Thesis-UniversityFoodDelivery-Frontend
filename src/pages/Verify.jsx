@@ -428,23 +428,16 @@ function Verify() {
                   </div>
                 </div>
 
-                <div className="flex gap-3">
-                  {status === "verified" ? (
+                {status === "verified" && (
+                  <div className="flex gap-3">
                     <button
                       type="button"
                       onClick={handleGoToDashboard}
                       className="flex-1 bg-orange-500 text-white py-3 rounded-lg font-medium text-base hover:bg-orange-600 transition-colors">
                       Go to Dashboard
                     </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => window.location.reload()}
-                      className="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg font-medium text-base hover:bg-gray-300 transition-colors">
-                      Refresh Status
-                    </button>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
             ) : null}
 
@@ -779,37 +772,39 @@ function Verify() {
             ) : null}
           </div>
 
-          <div className="mt-6 flex gap-3">
-            <button
-              type="button"
-              onClick={handleBack}
-              disabled={showStatusOnly || step === 0}
-              className="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg font-medium text-base hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-              Back
-            </button>
+          {!showStatusOnly && (
+            <div className="mt-6 flex gap-3">
+              <button
+                type="button"
+                onClick={handleBack}
+                disabled={step === 0}
+                className="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg font-medium text-base hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                Back
+              </button>
 
-            {showStatusOnly ? null : step < 3 ? (
-              <button
-                type="button"
-                onClick={handleContinue}
-                disabled={!isStepValid()}
-                className="flex-1 bg-orange-500 text-white py-3 rounded-lg font-medium text-base hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-                Continue
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={handleSubmitVerification}
-                disabled={submitVerificationLoading || verificationLoading}
-                className="flex-1 bg-orange-500 text-white py-3 rounded-lg font-medium text-base hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-                {submitVerificationLoading
-                  ? "Submitting..."
-                  : status === "pending"
-                    ? "Resubmit Verification"
-                    : "Submit for Verification"}
-              </button>
-            )}
-          </div>
+              {step < 3 ? (
+                <button
+                  type="button"
+                  onClick={handleContinue}
+                  disabled={!isStepValid()}
+                  className="flex-1 bg-orange-500 text-white py-3 rounded-lg font-medium text-base hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                  Continue
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleSubmitVerification}
+                  disabled={submitVerificationLoading || verificationLoading}
+                  className="flex-1 bg-orange-500 text-white py-3 rounded-lg font-medium text-base hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                  {submitVerificationLoading
+                    ? "Submitting..."
+                    : status === "pending"
+                      ? "Resubmit Verification"
+                      : "Submit for Verification"}
+                </button>
+              )}
+            </div>
+          )}
         </Card>
       </div>
     </div>

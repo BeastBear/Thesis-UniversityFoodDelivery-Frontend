@@ -23,22 +23,47 @@ function DeliveryVerification() {
   const [loading, setLoading] = useState(false);
   const [fetchingStatus, setFetchingStatus] = useState(true);
   const [pageMessage, setPageMessage] = useState(null);
-  const [profileForm, setProfileForm] = useState({
-    idNumber: "",
+  
+  const [profileForm, setProfileForm] = useState(() => {
+    const saved = localStorage.getItem("delivererProfileForm");
+    if (saved) return JSON.parse(saved);
+    return { idNumber: "" };
   });
-  const [studentForm, setStudentForm] = useState({
-    studentIdNumber: "",
-    faculty: "",
-    major: "",
+
+  const [studentForm, setStudentForm] = useState(() => {
+    const saved = localStorage.getItem("delivererStudentForm");
+    if (saved) return JSON.parse(saved);
+    return {
+      studentIdNumber: "",
+      faculty: "",
+      major: "",
+    };
   });
+
   const [profileImageFile, setProfileImageFile] = useState(null);
   const [savingProfileImage, setSavingProfileImage] = useState(false);
-  const [bankForm, setBankForm] = useState({
-    accountName: "",
-    bank: "",
-    accountNumber: "",
-    applicationId: "",
+
+  const [bankForm, setBankForm] = useState(() => {
+    const saved = localStorage.getItem("delivererBankForm");
+    if (saved) return JSON.parse(saved);
+    return {
+      bank: "",
+      accountNumber: "",
+      applicationId: "",
+    };
   });
+
+  useEffect(() => {
+    localStorage.setItem("delivererProfileForm", JSON.stringify(profileForm));
+  }, [profileForm]);
+
+  useEffect(() => {
+    localStorage.setItem("delivererStudentForm", JSON.stringify(studentForm));
+  }, [studentForm]);
+
+  useEffect(() => {
+    localStorage.setItem("delivererBankForm", JSON.stringify(bankForm));
+  }, [bankForm]);
 
   useEffect(() => {
     fetchVerificationStatus();
@@ -71,15 +96,15 @@ function DeliveryVerification() {
   ]);
 
   useEffect(() => {
-    const ep = userData?.ePaymentAccount;
-    setBankForm({
-      accountName: ep?.accountName || "",
-      bank: ep?.bank || "",
-      accountNumber: ep?.accountNumber || "",
-      applicationId: ep?.applicationId || "",
-    });
+    if (!localStorage.getItem("delivererBankForm")) {
+      const ep = userData?.ePaymentAccount;
+      setBankForm({
+        bank: ep?.bank || "",
+        accountNumber: ep?.accountNumber || "",
+        applicationId: ep?.applicationId || "",
+      });
+    }
   }, [
-    userData?.ePaymentAccount?.accountName,
     userData?.ePaymentAccount?.bank,
     userData?.ePaymentAccount?.accountNumber,
     userData?.ePaymentAccount?.applicationId,
@@ -222,7 +247,7 @@ function DeliveryVerification() {
       const res = await axios.post(
         `${serverUrl}/api/user/update-bank-account`,
         {
-          accountName: bankForm.accountName,
+          accountName: userData?.fullName || "",
           bank: bankForm.bank,
           branch: "",
           accountNumber: bankForm.accountNumber,
@@ -267,6 +292,9 @@ function DeliveryVerification() {
       });
       fetchVerificationStatus();
       setStudentCard(null);
+      localStorage.removeItem("delivererProfileForm");
+      localStorage.removeItem("delivererStudentForm");
+      localStorage.removeItem("delivererBankForm");
     } catch (error) {
       setPageMessage({ type: "error", text: "Failed to upload documents" });
     } finally {
@@ -302,22 +330,20 @@ function DeliveryVerification() {
     }
     if (step === 2) {
       return (
-        !!(bankForm.accountName || "").trim() &&
-        !!(bankForm.bank || "").trim() &&
-        !!(bankForm.accountNumber || "").trim()
+        !!(bankForm.bank || "").trim() && !!(bankForm.accountNumber || "").trim()
       );
     }
-    return true;
+    return true; // Step 3 is summary, always valid if user reaches it
   };
 
   const isAllValid = () => {
+    // Basic checks just in case submission reaches here
     return (
       !!profileForm.idNumber.trim() &&
       !!studentForm.studentIdNumber.trim() &&
       !!studentForm.faculty.trim() &&
       !!studentForm.major.trim() &&
       !!studentCard &&
-      !!(bankForm.accountName || "").trim() &&
       !!(bankForm.bank || "").trim() &&
       !!(bankForm.accountNumber || "").trim()
     );
@@ -389,28 +415,41 @@ function DeliveryVerification() {
         ) : null}
 
         {showStatusOnly ? (
-          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="rounded-2xl bg-slate-50 border border-slate-100 p-4">
-              <div className="text-xs font-black tracking-[0.14em] text-slate-500">
-                SUBMITTED AT
+          <>
+            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="rounded-2xl bg-slate-50 border border-slate-100 p-4">
+                <div className="text-xs font-black tracking-[0.14em] text-slate-500">
+                  SUBMITTED AT
+                </div>
+                <div className="mt-1 text-sm font-extrabold text-slate-900">
+                  {verificationStatus?.submittedAt
+                    ? new Date(verificationStatus.submittedAt).toLocaleString()
+                    : "—"}
+                </div>
               </div>
-              <div className="mt-1 text-sm font-extrabold text-slate-900">
-                {verificationStatus?.submittedAt
-                  ? new Date(verificationStatus.submittedAt).toLocaleString()
-                  : "—"}
+              <div className="rounded-2xl bg-slate-50 border border-slate-100 p-4">
+                <div className="text-xs font-black tracking-[0.14em] text-slate-500">
+                  VERIFIED AT
+                </div>
+                <div className="mt-1 text-sm font-extrabold text-slate-900">
+                  {verificationStatus?.verifiedAt
+                    ? new Date(verificationStatus.verifiedAt).toLocaleString()
+                    : "—"}
+                </div>
               </div>
             </div>
-            <div className="rounded-2xl bg-slate-50 border border-slate-100 p-4">
-              <div className="text-xs font-black tracking-[0.14em] text-slate-500">
-                VERIFIED AT
+
+            <div className="mt-4 rounded-lg border border-gray-200 bg-white p-4">
+              <div className="text-sm font-semibold text-gray-900">
+                What’s next?
               </div>
-              <div className="mt-1 text-sm font-extrabold text-slate-900">
-                {verificationStatus?.verifiedAt
-                  ? new Date(verificationStatus.verifiedAt).toLocaleString()
-                  : "—"}
+              <div className="text-sm text-gray-600 mt-1">
+                {status === "pending"
+                  ? "Please wait for admin review and then we will call you back to your number. You will be able to access deliverer features once approved."
+                  : "You can now proceed to access deliverer features."}
               </div>
             </div>
-          </div>
+          </>
         ) : null}
       </div>
 
@@ -430,10 +469,10 @@ function DeliveryVerification() {
           <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-4 sm:p-6">
             <div className="flex items-center justify-between gap-3">
               <div className="text-xs font-black tracking-[0.14em] text-slate-500">
-                STEP {step + 1} / 3
+                STEP {step + 1} / 4
               </div>
               <div className="text-xs font-black tracking-[0.14em] text-slate-500">
-                {step === 0 ? "PROFILE" : step === 1 ? "STUDENT" : "BANK"}
+                {step === 0 ? "PROFILE" : step === 1 ? "STUDENT" : step === 2 ? "BANK" : "SUMMARY"}
               </div>
             </div>
 
@@ -582,7 +621,7 @@ function DeliveryVerification() {
                   </div>
                 </div>
               </>
-            ) : (
+            ) : step === 2 ? (
               <>
                 <div className="mt-2 text-base sm:text-lg font-extrabold text-slate-900">
                   Bank Info
@@ -594,30 +633,25 @@ function DeliveryVerification() {
                 <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <div className="text-sm font-medium text-gray-700">
-                      Account Name
+                      Bank Name
                     </div>
-                    <input
-                      type="text"
-                      name="accountName"
-                      value={bankForm.accountName}
-                      onChange={handleBankChange}
-                      className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Enter account name"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="text-sm font-medium text-gray-700">
-                      Bank
-                    </div>
-                    <input
-                      type="text"
+                    <select
                       name="bank"
                       value={bankForm.bank}
                       onChange={handleBankChange}
-                      className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Enter bank"
-                    />
+                      className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                      <option value="">Select bank</option>
+                      <option value="KBANK">Kasikornbank (KBANK)</option>
+                      <option value="SCB">Siam Commercial Bank (SCB)</option>
+                      <option value="BBL">Bangkok Bank (BBL)</option>
+                      <option value="KTB">Krungthai Bank (KTB)</option>
+                      <option value="BAY">Bank of Ayudhya (Krungsri/BAY)</option>
+                      <option value="TTB">TMBThanachart Bank (TTB)</option>
+                      <option value="GSB">Government Savings Bank (GSB)</option>
+                      <option value="KKP">Kiatnakin Phatra Bank (KKP)</option>
+                      <option value="CIMBT">CIMB Thai Bank (CIMBT)</option>
+                      <option value="UOBBT">United Overseas Bank (UOB/UOBBT)</option>
+                    </select>
                   </div>
 
                   <div className="space-y-2">
@@ -635,6 +669,86 @@ function DeliveryVerification() {
                   </div>
                 </div>
               </>
+            ) : (
+              <>
+                <div className="mt-2 text-base sm:text-lg font-extrabold text-slate-900">
+                  Summary
+                </div>
+                <div className="text-sm text-gray-500 mt-1">
+                  Please verify your information before submitting.
+                </div>
+
+                <div className="mt-4 space-y-4">
+                  {/* Profile Summary */}
+                  <div className="rounded-2xl bg-slate-50 border border-slate-100 p-4">
+                    <div className="text-xs font-black tracking-[0.14em] text-slate-500 mb-3">
+                      PROFILE INFO
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <div className="text-xs text-gray-500">ID Number</div>
+                        <div className="text-sm font-semibold text-gray-900 mt-0.5">
+                          {profileForm.idNumber || "—"}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-xs text-gray-500">Full Name</div>
+                        <div className="text-sm font-semibold text-gray-900 mt-0.5">
+                          {userData?.fullName || "—"}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Student Summary */}
+                  <div className="rounded-2xl bg-slate-50 border border-slate-100 p-4">
+                    <div className="text-xs font-black tracking-[0.14em] text-slate-500 mb-3">
+                      STUDENT INFO
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <div className="text-xs text-gray-500">Student ID Number</div>
+                        <div className="text-sm font-semibold text-gray-900 mt-0.5">
+                          {studentForm.studentIdNumber || "—"}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-xs text-gray-500">Faculty / Major</div>
+                        <div className="text-sm font-semibold text-gray-900 mt-0.5">
+                          {studentForm.faculty} / {studentForm.major}
+                        </div>
+                      </div>
+                      <div className="sm:col-span-2">
+                        <div className="text-xs text-gray-500">Student Card Document</div>
+                        <div className="text-sm font-semibold text-gray-900 mt-0.5">
+                          {studentCard ? "File Selected" : "Not Selected"}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Bank Summary */}
+                  <div className="rounded-2xl bg-slate-50 border border-slate-100 p-4">
+                    <div className="text-xs font-black tracking-[0.14em] text-slate-500 mb-3">
+                      BANK INFO
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <div className="text-xs text-gray-500">Bank Name</div>
+                        <div className="text-sm font-semibold text-gray-900 mt-0.5">
+                          {bankForm.bank || "—"}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-xs text-gray-500">Account Number</div>
+                        <div className="text-sm font-semibold text-gray-900 mt-0.5">
+                          {bankForm.accountNumber || "—"}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </>
             )}
 
             <div className="mt-6 flex gap-3">
@@ -646,10 +760,10 @@ function DeliveryVerification() {
                 Back
               </button>
 
-              {step < 2 ? (
+              {step < 3 ? (
                 <button
                   type="button"
-                  onClick={() => setStep((s) => Math.min(2, s + 1))}
+                  onClick={() => setStep((s) => Math.min(3, s + 1))}
                   disabled={!isStepValid()}
                   className="flex-1 bg-blue-600 text-white py-3 rounded-lg font-medium text-base hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                   Next
