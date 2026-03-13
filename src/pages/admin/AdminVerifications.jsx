@@ -524,12 +524,6 @@ const AdminVerifications = () => {
                       </div>
                       <div>
                         <span className="font-semibold text-gray-900">
-                          Account Name:
-                        </span>{" "}
-                        {selectedUser.ePaymentAccount?.accountName || "—"}
-                      </div>
-                      <div>
-                        <span className="font-semibold text-gray-900">
                           Account No:
                         </span>{" "}
                         {selectedUser.ePaymentAccount?.accountNumber || "—"}
