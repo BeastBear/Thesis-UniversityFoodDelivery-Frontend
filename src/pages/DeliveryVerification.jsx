@@ -23,7 +23,7 @@ function DeliveryVerification() {
   const [loading, setLoading] = useState(false);
   const [fetchingStatus, setFetchingStatus] = useState(true);
   const [pageMessage, setPageMessage] = useState(null);
-  
+
   const [profileForm, setProfileForm] = useState(() => {
     const saved = localStorage.getItem("delivererProfileForm");
     if (saved) return JSON.parse(saved);
@@ -330,7 +330,8 @@ function DeliveryVerification() {
     }
     if (step === 2) {
       return (
-        !!(bankForm.bank || "").trim() && !!(bankForm.accountNumber || "").trim()
+        !!(bankForm.bank || "").trim() &&
+        !!(bankForm.accountNumber || "").trim()
       );
     }
     return true; // Step 3 is summary, always valid if user reaches it
@@ -472,7 +473,13 @@ function DeliveryVerification() {
                 STEP {step + 1} / 4
               </div>
               <div className="text-xs font-black tracking-[0.14em] text-slate-500">
-                {step === 0 ? "PROFILE" : step === 1 ? "STUDENT" : step === 2 ? "BANK" : "SUMMARY"}
+                {step === 0
+                  ? "PROFILE"
+                  : step === 1
+                    ? "STUDENT"
+                    : step === 2
+                      ? "BANK"
+                      : "SUMMARY"}
               </div>
             </div>
 
@@ -527,25 +534,25 @@ function DeliveryVerification() {
                   </div>
                   <div className="rounded-2xl bg-slate-50 border border-slate-100 p-4">
                     <div className="text-xs font-black tracking-[0.14em] text-slate-500">
-                      MOBILE
+                      PHONE NUMBER
                     </div>
                     <div className="mt-1 text-sm font-extrabold text-slate-900">
                       {userData?.mobile || "—"}
                     </div>
                   </div>
-                </div>
-
-                <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700">
-                      ID Number
+                  <div className="rounded-2xl bg-slate-50 border border-slate-100 p-4 flex flex-col justify-center">
+                    <label
+                      htmlFor="idNumber"
+                      className="text-xs font-black tracking-[0.14em] text-slate-500 cursor-pointer">
+                      ID NUMBER
                     </label>
                     <input
                       type="text"
+                      id="idNumber"
                       name="idNumber"
                       value={profileForm.idNumber}
                       onChange={handleProfileChange}
-                      className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="mt-1 w-full bg-transparent text-sm font-extrabold text-slate-900 focus:outline-none placeholder:text-slate-400 placeholder:font-medium"
                       placeholder="Enter ID number"
                     />
                   </div>
@@ -633,6 +640,19 @@ function DeliveryVerification() {
                 <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <div className="text-sm font-medium text-gray-700">
+                      Account Number
+                    </div>
+                    <input
+                      type="text"
+                      name="accountNumber"
+                      value={bankForm.accountNumber}
+                      onChange={handleBankChange}
+                      className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Enter account number"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="text-sm font-medium text-gray-700">
                       Bank Name
                     </div>
                     <select
@@ -645,27 +665,17 @@ function DeliveryVerification() {
                       <option value="SCB">Siam Commercial Bank (SCB)</option>
                       <option value="BBL">Bangkok Bank (BBL)</option>
                       <option value="KTB">Krungthai Bank (KTB)</option>
-                      <option value="BAY">Bank of Ayudhya (Krungsri/BAY)</option>
+                      <option value="BAY">
+                        Bank of Ayudhya (Krungsri/BAY)
+                      </option>
                       <option value="TTB">TMBThanachart Bank (TTB)</option>
                       <option value="GSB">Government Savings Bank (GSB)</option>
                       <option value="KKP">Kiatnakin Phatra Bank (KKP)</option>
                       <option value="CIMBT">CIMB Thai Bank (CIMBT)</option>
-                      <option value="UOBBT">United Overseas Bank (UOB/UOBBT)</option>
+                      <option value="UOBBT">
+                        United Overseas Bank (UOB/UOBBT)
+                      </option>
                     </select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="text-sm font-medium text-gray-700">
-                      Account Number
-                    </div>
-                    <input
-                      type="text"
-                      name="accountNumber"
-                      value={bankForm.accountNumber}
-                      onChange={handleBankChange}
-                      className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Enter account number"
-                    />
                   </div>
                 </div>
               </>
@@ -681,8 +691,19 @@ function DeliveryVerification() {
                 <div className="mt-4 space-y-4">
                   {/* Profile Summary */}
                   <div className="rounded-2xl bg-slate-50 border border-slate-100 p-4">
-                    <div className="text-xs font-black tracking-[0.14em] text-slate-500 mb-3">
-                      PROFILE INFO
+                    <div className="flex items-center gap-3 mb-4">
+                      {userData?.profileImage ? (
+                        <img
+                          src={userData.profileImage}
+                          alt="Profile"
+                          className="w-10 h-10 rounded-full object-cover border border-slate-200"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 rounded-full bg-white border border-slate-200" />
+                      )}
+                      <div className="text-xs font-black tracking-[0.14em] text-slate-500">
+                        PROFILE INFO
+                      </div>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
@@ -697,6 +718,18 @@ function DeliveryVerification() {
                           {userData?.fullName || "—"}
                         </div>
                       </div>
+                      <div>
+                        <div className="text-xs text-gray-500">Email</div>
+                        <div className="text-sm font-semibold text-gray-900 mt-0.5">
+                          {userData?.email || "—"}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-xs text-gray-500">Phone Number</div>
+                        <div className="text-sm font-semibold text-gray-900 mt-0.5">
+                          {userData?.mobile || "—"}
+                        </div>
+                      </div>
                     </div>
                   </div>
 
@@ -707,22 +740,38 @@ function DeliveryVerification() {
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <div className="text-xs text-gray-500">Student ID Number</div>
+                        <div className="text-xs text-gray-500">
+                          Student ID Number
+                        </div>
                         <div className="text-sm font-semibold text-gray-900 mt-0.5">
                           {studentForm.studentIdNumber || "—"}
                         </div>
                       </div>
                       <div>
-                        <div className="text-xs text-gray-500">Faculty / Major</div>
+                        <div className="text-xs text-gray-500">
+                          Faculty / Major
+                        </div>
                         <div className="text-sm font-semibold text-gray-900 mt-0.5">
                           {studentForm.faculty} / {studentForm.major}
                         </div>
                       </div>
                       <div className="sm:col-span-2">
-                        <div className="text-xs text-gray-500">Student Card Document</div>
-                        <div className="text-sm font-semibold text-gray-900 mt-0.5">
-                          {studentCard ? "File Selected" : "Not Selected"}
+                        <div className="text-xs text-gray-500">
+                          Student Card Document
                         </div>
+                        {studentCard ? (
+                          <div className="mt-2 text-sm font-semibold text-gray-900">
+                            <img
+                              src={URL.createObjectURL(studentCard)}
+                              alt="Student Card Preview"
+                              className="w-full max-w-sm rounded-lg object-cover border border-slate-200 shadow-sm"
+                            />
+                          </div>
+                        ) : (
+                          <div className="text-sm font-semibold text-gray-900 mt-0.5">
+                            Not Selected
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -740,7 +789,9 @@ function DeliveryVerification() {
                         </div>
                       </div>
                       <div>
-                        <div className="text-xs text-gray-500">Account Number</div>
+                        <div className="text-xs text-gray-500">
+                          Account Number
+                        </div>
                         <div className="text-sm font-semibold text-gray-900 mt-0.5">
                           {bankForm.accountNumber || "—"}
                         </div>
