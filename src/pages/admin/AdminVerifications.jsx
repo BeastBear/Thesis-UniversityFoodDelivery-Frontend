@@ -85,7 +85,10 @@ const AdminVerifications = () => {
     if (!user) return [];
     if (activeTab === "deliverer") {
       const docs = user.deliveryVerification?.documents || {};
-      return [{ label: "Student Card", url: docs.studentCard || "" }].filter(
+      return [
+        { label: "Profile Picture", url: user.profileImage || "" },
+        { label: "Student Card", url: docs.studentCard || "" }
+      ].filter(
         (d) => d.url,
       );
     }
@@ -410,21 +413,34 @@ const AdminVerifications = () => {
                   <div className="text-xs font-bold text-gray-500 uppercase tracking-wider">
                     Applicant
                   </div>
-                  <div className="mt-2">
-                    <div className="text-base font-extrabold text-gray-900">
-                      {selectedUser.fullName || "—"}
-                    </div>
-                    <div className="mt-1 text-sm text-gray-600">
-                      email: {selectedUser.email || "—"}
-                      <span className="mx-2 text-gray-300">|</span>
-                      phone no.: {selectedUser.mobile || "—"}
-                    </div>
-                    <div className="mt-2 text-xs text-gray-400 font-mono">
-                      {tab === "deliverer" ? "ID Number: " : "User Id Number: "}
-                      {tab === "deliverer"
-                        ? selectedUser.deliveryVerification?.profile
-                            ?.idNumber || "—"
-                        : selectedUser.ownerVerification?.kyc?.idNumber || "—"}
+                  <div className="mt-3 flex items-start gap-4">
+                    {selectedUser.profileImage ? (
+                      <img
+                        src={selectedUser.profileImage}
+                        alt="Applicant Avatar"
+                        className="w-12 h-12 rounded-full object-cover border border-gray-100 shadow-sm"
+                      />
+                    ) : (
+                      <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-400">
+                         <FaUserShield size={20} />
+                      </div>
+                    )}
+                    <div>
+                      <div className="text-base font-extrabold text-gray-900">
+                        {selectedUser.fullName || "—"}
+                      </div>
+                      <div className="mt-1 text-sm text-gray-600">
+                        email: {selectedUser.email || "—"}
+                        <span className="mx-2 text-gray-300">|</span>
+                        phone no.: {selectedUser.mobile || "—"}
+                      </div>
+                      <div className="mt-2 text-xs text-gray-400 font-mono">
+                        {tab === "deliverer" ? "ID Number: " : "User Id Number: "}
+                        {tab === "deliverer"
+                          ? selectedUser.deliveryVerification?.profile
+                              ?.idNumber || "—"
+                          : selectedUser.ownerVerification?.kyc?.idNumber || "—"}
+                      </div>
                     </div>
                   </div>
                 </div>
