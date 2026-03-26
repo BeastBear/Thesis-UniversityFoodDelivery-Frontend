@@ -426,7 +426,14 @@ function CartPage() {
       const { clientSecret } = res.data;
       const { error, paymentIntent } = await stripe.confirmPromptPayPayment(
         clientSecret,
-        { payment_method: { type: 'promptpay' } }
+        { 
+          payment_method: { 
+            type: 'promptpay',
+            billing_details: {
+              email: userData?.email || "guest@example.com"
+            }
+          } 
+        }
       );
       
       if (error) {
