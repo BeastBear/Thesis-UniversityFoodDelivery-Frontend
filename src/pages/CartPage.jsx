@@ -424,7 +424,10 @@ function CartPage() {
       );
       
       const { clientSecret } = res.data;
-      const { error, paymentIntent } = await stripe.confirmPromptPayPayment(clientSecret);
+      const { error, paymentIntent } = await stripe.confirmPromptPayPayment(
+        clientSecret,
+        { payment_method: { type: 'promptpay' } }
+      );
       
       if (error) {
          setOrderError(error.message);
