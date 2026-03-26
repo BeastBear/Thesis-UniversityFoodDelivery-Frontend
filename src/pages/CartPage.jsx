@@ -46,6 +46,9 @@ import EmptyState from "../components/ui/EmptyState";
 import PrimaryButton from "../components/ui/PrimaryButton";
 import { useHeaderTitle } from "../context/UIContext.jsx";
 import useCafeterias from "../hooks/useCafeterias";
+import { loadStripe } from '@stripe/stripe-js';
+
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 function CartPage() {
   const navigate = useNavigate();
@@ -343,11 +346,58 @@ function CartPage() {
     }
   };
 
-  // 4. Order Logic
+  const processCardPayment = async (orderIdToPay) => {
+    let isSuccess = false;
+    try {
+      const stripe = await stripePromise;
+      const chargeRes = await axios.post(
+        `${serverUrl}/api/order/charge-saved-card`,
+        { orderId: orderIdToPay, paymentMethodId: defaultCard.stripePaymentMethodId },
+        { withCredentials: true }
+      );
+
+      if (chargeRes.data.status === "succeeded") {
+        isSuccess = true;
+      } else if (chargeRes.data.status === "requires_action") {
+        const { error, paymentIntent } = await stripe.handleNextAction({
+          clientSecret: chargeRes.data.clientSecret,
+        });
+
+        if (error) {
+          setOrderError(error.message);
+        } else if (paymentIntent && paymentIntent.status === "succeeded") {
+          isSuccess = true;
+        } else {
+           setOrderError("Authentication failed or cancelled.");
+        }
+      }
+    } catch (err) {
+      setOrderError(err.response?.data?.message || err.message || "Card payment failed");
+    }
+
+    if (isSuccess) {
+       dispatch(clearCart());
+       localStorage.setItem("pendingOrderId", orderIdToPay);
+       navigate(`/order-placed?payment=success`);
+    } else {
+       setOrderId(orderIdToPay);
+       localStorage.setItem("pendingOrderId", orderIdToPay);
+       setIsRetryPayment(true);
+       setRetryAmount(totalPayable || retryAmount);
+    }
+  };
+
   const handlePlaceOrder = async () => {
     if (isRetryPayment && orderId) {
       setIsProcessingPayment(true);
-      await createPaymentIntent(orderId);
+      setOrderError("");
+      
+      if (selectedPaymentMethod === "card" && defaultCard?.stripePaymentMethodId) {
+         await processCardPayment(orderId);
+      } else {
+         await createPaymentIntent(orderId);
+      }
+      setIsProcessingPayment(false);
       return;
     }
 
@@ -392,7 +442,10 @@ function CartPage() {
         dispatch(addMyOrder(res.data));
         dispatch(clearCart());
         navigate(`/track-order/${res.data._id}`);
+      } else if (selectedPaymentMethod === "card" && defaultCard?.stripePaymentMethodId) {
+        await processCardPayment(res.data._id);
       } else {
+        // Fallback or PromptPay Checkout Session Redirect
         setOrderId(res.data._id);
         // Store order ID in localStorage for OrderPlaced page verification
         localStorage.setItem("pendingOrderId", res.data._id);
