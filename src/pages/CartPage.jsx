@@ -109,6 +109,8 @@ function CartPage() {
   const [deliveryZone, setDeliveryZone] = useState(null);
   const [systemBaseDeliveryFee, setSystemBaseDeliveryFee] = useState(null);
   const [systemPricePerKm, setSystemPricePerKm] = useState(null);
+  const [promptPayQrUrl, setPromptPayQrUrl] = useState("");
+  const [pollingClientSecret, setPollingClientSecret] = useState(null);
 
   // Cafeteria data
   const { cafeterias, cafeteriaLocations } = useCafeterias();
@@ -131,6 +133,31 @@ function CartPage() {
       setSelectedPaymentMethod("online"); // Default to online for retry
     }
   }, [locationState.state]);
+
+  // Handle PromptPay Polling
+  useEffect(() => {
+    let intervalId;
+    if (pollingClientSecret && promptPayQrUrl) {
+      intervalId = setInterval(async () => {
+        try {
+           const stripe = await stripePromise;
+           const { paymentIntent } = await stripe.retrievePaymentIntent(pollingClientSecret);
+           if (paymentIntent && paymentIntent.status === 'succeeded') {
+              clearInterval(intervalId);
+              setPollingClientSecret(null);
+              setPromptPayQrUrl("");
+              dispatch(clearCart());
+              navigate(`/order-placed?payment=success`);
+           }
+        } catch (error) {
+           console.error("Polling error:", error);
+        }
+      }, 3000);
+    }
+    return () => {
+       if (intervalId) clearInterval(intervalId);
+    };
+  }, [pollingClientSecret, promptPayQrUrl, dispatch, navigate]);
 
   // 1. Fetch Shops & Settings
   useEffect(() => {
@@ -387,6 +414,35 @@ function CartPage() {
     }
   };
 
+  const processPromptPayPayment = async (orderIdToPay) => {
+    try {
+      const stripe = await stripePromise;
+      const res = await axios.post(
+        `${serverUrl}/api/order/create-promptpay-intent`,
+        { orderId: orderIdToPay },
+        { withCredentials: true }
+      );
+      
+      const { clientSecret } = res.data;
+      const { error, paymentIntent } = await stripe.confirmPromptPayPayment(clientSecret);
+      
+      if (error) {
+         setOrderError(error.message);
+         setIsProcessingPayment(false);
+      } else if (paymentIntent && paymentIntent.next_action?.promptpay_display_qr_code) {
+         setPromptPayQrUrl(paymentIntent.next_action.promptpay_display_qr_code.image_url_png);
+         setPollingClientSecret(clientSecret);
+         setIsProcessingPayment(false);
+      } else if (paymentIntent && paymentIntent.status === 'succeeded') {
+         dispatch(clearCart());
+         navigate(`/order-placed?payment=success`);
+      }
+    } catch (err) {
+      setOrderError(err.response?.data?.message || err.message || "PromptPay initialization failed");
+      setIsProcessingPayment(false);
+    }
+  };
+
   const handlePlaceOrder = async () => {
     if (isRetryPayment && orderId) {
       setIsProcessingPayment(true);
@@ -394,10 +450,11 @@ function CartPage() {
       
       if (selectedPaymentMethod === "card" && defaultCard?.stripePaymentMethodId) {
          await processCardPayment(orderId);
+      } else if (selectedPaymentMethod === "promptpay") {
+         await processPromptPayPayment(orderId);
       } else {
          await createPaymentIntent(orderId);
       }
-      setIsProcessingPayment(false);
       return;
     }
 
@@ -444,10 +501,11 @@ function CartPage() {
         navigate(`/track-order/${res.data._id}`);
       } else if (selectedPaymentMethod === "card" && defaultCard?.stripePaymentMethodId) {
         await processCardPayment(res.data._id);
+      } else if (selectedPaymentMethod === "promptpay") {
+        await processPromptPayPayment(res.data._id);
       } else {
-        // Fallback or PromptPay Checkout Session Redirect
+        // Fallback
         setOrderId(res.data._id);
-        // Store order ID in localStorage for OrderPlaced page verification
         localStorage.setItem("pendingOrderId", res.data._id);
         await createPaymentIntent(res.data._id);
       }
@@ -943,6 +1001,36 @@ function CartPage() {
           </button>
         </div>
       </div>
+
+      {/* PromptPay QR Code Modal */}
+      {promptPayQrUrl && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <Card className="p-6 max-w-sm w-full bg-white flex flex-col items-center text-center">
+            <h3 className="font-extrabold text-xl text-gray-900 mb-2">Scan to Pay</h3>
+            <p className="text-sm text-gray-500 mb-6">Open your banking app to scan this PromptPay QR Code.</p>
+            <div className="bg-white p-4 rounded-2xl border border-gray-100 mb-6 w-full flex justify-center shadow-inner">
+              <img src={promptPayQrUrl} alt="PromptPay QR Code" className="w-56 h-56 object-contain" />
+            </div>
+            <div className="w-full space-y-3">
+              <div className="flex items-center justify-center gap-2 text-primary-orange text-sm font-bold mb-4">
+                <div className="w-4 h-4 rounded-full border-2 border-primary-orange/40 border-t-primary-orange animate-spin" />
+                Waiting for payment...
+              </div>
+              <button 
+                className="w-full py-3 text-red-600 font-bold bg-red-50 rounded-xl hover:bg-red-100 transition-colors"
+                onClick={() => {
+                  setPromptPayQrUrl("");
+                  setPollingClientSecret(null);
+                  setOrderError("PromptPay payment cancelled by user.");
+                }}
+              >
+                Cancel Payment
+              </button>
+            </div>
+          </Card>
+        </div>
+      )}
+
     </div>
   );
 }
