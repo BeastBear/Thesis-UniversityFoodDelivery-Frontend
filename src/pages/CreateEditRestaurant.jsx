@@ -443,9 +443,6 @@ function CreateEditRestaurant() {
                     value={shopNumber}
                     pattern="[+]?[0-9]{10,15}"
                   />
-                  <p className="text-xs text-gray-500 mt-1">
-                    10-15 digits, optional country code
-                  </p>
                 </div>
               </div>
 
