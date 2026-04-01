@@ -433,7 +433,7 @@ function CreateEditRestaurant() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Phone Number
+                    Restaurant Lot Number
                   </label>
                   <input
                     type="tel"

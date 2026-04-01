@@ -192,7 +192,7 @@ function Contracts() {
             </div>
             <div className="space-y-2">
               <div className="text-sm font-semibold text-gray-900">
-                Restaurant Number
+                Restaurant Lot Number
               </div>
               <div className="px-3 py-2.5 rounded-lg text-sm font-medium bg-white text-gray-900 border border-gray-200">
                 {restaurantNumber}
