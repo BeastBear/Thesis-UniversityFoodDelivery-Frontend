@@ -310,7 +310,7 @@ function Restaurant() {
       {/* 2. Content Container - Fluid Width */}
       <div className="w-full px-4 sm:px-6 md:px-10 pt-6 pb-8 max-w-5xl mx-auto">
         {/* 3. Sticky Tabs & Search */}
-        <div className="sticky top-16 sm:top-20 md:top-6 bg-white/95 backdrop-blur-xl z-30 pt-2 pb-4 mb-6 -mx-4 sm:-mx-6 px-4 sm:px-6 border-b border-gray-50 shadow-sm">
+        <div className="sticky top-16 md:top-20 bg-white/95 backdrop-blur-xl z-35 pt-2 pb-4 mb-6 -mx-4 sm:-mx-6 px-4 sm:px-6 border-b border-gray-50 shadow-sm">
           <div className="w-full">
             {/* Search Bar */}
             <div className="mb-4">
@@ -339,7 +339,7 @@ function Restaurant() {
             </div>
 
             {/* Category Tabs - Clean & Tight */}
-            <div className="flex justify-center gap-2 overflow-x-auto hide-scrollbar">
+            <div className="flex justify-start md:justify-center gap-2 overflow-x-auto hide-scrollbar px-2">
               <button
                 type="button"
                 onClick={() => {

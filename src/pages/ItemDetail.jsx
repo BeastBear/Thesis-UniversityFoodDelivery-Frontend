@@ -311,7 +311,7 @@ function ItemDetail() {
               </span>
             </div>
             <p className="text-gray-500 text-base leading-relaxed">
-              {item.description}
+              {item.descriptionEnglish || item.descriptionThai || item.description}
             </p>
           </Card>
 

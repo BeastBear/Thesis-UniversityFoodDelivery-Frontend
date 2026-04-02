@@ -769,7 +769,7 @@ function CartPage() {
                               {item.selectedOptions &&
                               Object.keys(item.selectedOptions).length > 0
                                 ? formatSelectedOptions(item.selectedOptions)
-                                : item.description || ""}
+                                : item.descriptionEnglish || item.descriptionThai || item.description || ""}
                             </p>
                             {item.specialInstructions && (
                               <p className="text-xs text-gray-500 mt-1 italic">

@@ -57,7 +57,7 @@ function FoodCard({ data }) {
 
         {/* Description Placeholder */}
         <div className="text-xs text-gray-500 line-clamp-1">
-          {data.description || "Delicious food"}
+          {data.descriptionEnglish || data.descriptionThai || data.description || "Delicious food"}
         </div>
 
         <div className="mt-auto flex justify-between items-center pt-2">
