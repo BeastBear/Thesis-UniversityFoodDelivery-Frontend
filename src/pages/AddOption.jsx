@@ -389,14 +389,7 @@ function AddOption() {
         </Card>
 
         {/* Save Button */}
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 md:hidden">
-          <PrimaryButton type="submit" disabled={loading} className="w-full">
-            {loading ? <ClipLoader size={20} color="white" /> : "Save"}
-          </PrimaryButton>
-        </div>
-
-        {/* Desktop Save Button */}
-        <div className="hidden md:block mt-6">
+        <div className="mt-6 w-full">
           <PrimaryButton type="submit" disabled={loading} className="w-full">
             {loading ? <ClipLoader size={20} color="white" /> : "Save"}
           </PrimaryButton>
