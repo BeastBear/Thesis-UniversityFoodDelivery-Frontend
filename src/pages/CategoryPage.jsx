@@ -17,27 +17,30 @@ function CategoryPage() {
   );
   const [filteredShops, setFilteredShops] = useState([]);
   const [category, setCategory] = useState(null);
+  const [allCategories, setAllCategories] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useHeaderTitle(category?.name || "Category", {
+  useHeaderTitle(categoryId === "all" ? "All Categories" : category?.name || "Category", {
     loading,
     loadingText: "Loading...",
   });
 
   useEffect(() => {
     const fetchCategory = async () => {
-      if (categoryId && categoryId !== "all") {
-        try {
-          const response = await axios.get(
-            `${serverUrl}/api/global-categories`,
-          );
-          const categories = Array.isArray(response.data) ? response.data : [];
+      try {
+        const response = await axios.get(
+          `${serverUrl}/api/global-categories`,
+        );
+        const categories = Array.isArray(response.data) ? response.data : [];
+        setAllCategories(categories);
+        
+        if (categoryId && categoryId !== "all") {
           const foundCategory = categories.find(
             (cat) => cat._id === categoryId,
           );
           setCategory(foundCategory || null);
-        } catch (error) {}
-      }
+        }
+      } catch (error) {}
       setLoading(false);
     };
 
@@ -99,6 +102,33 @@ function CategoryPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {[...Array(8)].map((_, i) => (
               <RestaurantSkeleton key={i} />
+            ))}
+          </div>
+        ) : categoryId === "all" ? (
+          <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4 sm:gap-6 pt-4">
+            {allCategories.map((cate, index) => (
+              <div
+                key={cate._id}
+                onClick={() => navigate(`/category/${cate._id}`)}
+                className="w-full shrink-0 flex flex-col items-center gap-3 cursor-pointer group transition-all">
+                <div
+                  className={`w-full aspect-square rounded-2xl flex items-center justify-center shadow-lg border transition-all overflow-hidden group-hover:shadow-xl group-hover:-translate-y-1 group-hover:rotate-1 ${
+                    index % 3 === 0
+                      ? "bg-linear-to-br from-primary-orange/10 to-primary-orange/20 border-none shadow-md"
+                      : index % 3 === 1
+                        ? "bg-linear-to-br from-blue-50 to-blue-100 border-blue-200"
+                        : "bg-linear-to-br from-green-50 to-green-100 border-green-200"
+                  }`}>
+                  <img
+                    src={cate.image}
+                    alt={cate.name}
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                  />
+                </div>
+                <span className="font-semibold text-xs sm:text-sm transition-colors text-center text-gray-700 group-hover:text-primary-orange whitespace-normal line-clamp-2 leading-tight">
+                  {cate.name}
+                </span>
+              </div>
             ))}
           </div>
         ) : filteredShops.length > 0 ? (

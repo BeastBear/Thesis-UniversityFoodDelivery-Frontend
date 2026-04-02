@@ -455,6 +455,17 @@ function UserDashboard() {
               </div>
             );
           })}
+          
+          <div
+            onClick={() => navigate("/category/all")}
+            className="w-[100px] shrink-0 snap-start flex flex-col items-center gap-3 cursor-pointer group transition-all">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center shadow-lg border transition-all overflow-hidden group-hover:shadow-xl group-hover:-translate-y-1 group-hover:rotate-1 bg-linear-to-br from-primary-orange/5 to-primary-orange/20 border-primary-orange/20">
+              <FaArrowRight className="text-2xl sm:text-3xl text-primary-orange transition-transform duration-300 group-hover:translate-x-1 group-hover:scale-110" />
+            </div>
+            <span className="font-semibold text-xs sm:text-sm transition-colors text-center text-gray-700 group-hover:text-primary-orange whitespace-normal line-clamp-2 leading-tight">
+              View All
+            </span>
+          </div>
         </div>
       </div>
 
