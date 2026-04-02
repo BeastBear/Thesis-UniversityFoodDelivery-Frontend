@@ -440,7 +440,7 @@ function MenuManagement() {
             <button
               type="button"
               onClick={() => setActiveTab("menu")}
-              className={`flex-1 py-3 text-center font-bold rounded-2xl transition-all ${
+              className={`flex-1 py-3 px-1 text-center font-bold text-[13px] sm:text-sm rounded-2xl transition-all ${
                 activeTab === "menu"
                   ? "text-white shadow-lg"
                   : "bg-white text-gray-600 hover:bg-gray-100"
@@ -458,7 +458,7 @@ function MenuManagement() {
             <button
               type="button"
               onClick={() => setActiveTab("options")}
-              className={`flex-1 py-3 text-center font-bold rounded-2xl transition-all ${
+              className={`flex-1 py-3 px-1 text-center font-bold text-[13px] sm:text-sm rounded-2xl transition-all ${
                 activeTab === "options"
                   ? "text-white shadow-lg"
                   : "bg-white text-gray-600 hover:bg-gray-100"
@@ -473,10 +473,16 @@ function MenuManagement() {
               }>
               Options
             </button>
+            <button
+              type="button"
+              onClick={() => navigate("/manage-categories")}
+              className="flex-1 py-3 px-1 text-center font-bold text-[13px] sm:text-sm rounded-2xl transition-all bg-white text-gray-600 hover:bg-gray-100">
+              Categories
+            </button>
           </div>
 
-          {/* Search Bar */}
-          <div className="px-4 pb-4">
+          {/* Search Bar & Actions */}
+          <div className="px-4 pb-4 flex flex-col gap-3">
             <div className="relative">
               <FaSearch
                 className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
@@ -499,6 +505,7 @@ function MenuManagement() {
                 </button>
               )}
             </div>
+            
           </div>
         </div>
       </div>
