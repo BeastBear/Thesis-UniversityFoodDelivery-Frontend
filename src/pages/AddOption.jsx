@@ -31,7 +31,7 @@ function AddOption() {
   const [newChoice, setNewChoice] = useState({
     name: "",
     priceType: "noChange",
-    price: 0,
+    price: "",
   });
   const [draggedIndex, setDraggedIndex] = useState(null);
   const [dragOverIndex, setDragOverIndex] = useState(null);
@@ -64,7 +64,7 @@ function AddOption() {
   };
 
   const addOption = () => {
-    setNewChoice({ name: "", priceType: "noChange", price: 0 });
+    setNewChoice({ name: "", priceType: "noChange", price: "" });
     setShowAddChoiceModal(true);
   };
 
@@ -74,7 +74,7 @@ function AddOption() {
       return;
     }
 
-    const priceValue = newChoice.priceType === "noChange" ? 0 : newChoice.price;
+    const priceValue = newChoice.priceType === "noChange" ? 0 : parseFloat(newChoice.price) || 0;
     setOptions([
       ...options,
       {
@@ -84,7 +84,7 @@ function AddOption() {
       },
     ]);
     setShowAddChoiceModal(false);
-    setNewChoice({ name: "", priceType: "noChange", price: 0 });
+    setNewChoice({ name: "", priceType: "noChange", price: "" });
   };
 
   const updateOption = (index, field, value) => {
@@ -470,10 +470,10 @@ function AddOption() {
                           onChange={(e) =>
                             setNewChoice({
                               ...newChoice,
-                              price: parseFloat(e.target.value) || 0,
+                              price: e.target.value,
                             })
                           }
-                          placeholder="Enter amount"
+                          placeholder="0"
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-orange/20 focus:border-primary-orange"
                         />
                       </div>
@@ -502,10 +502,10 @@ function AddOption() {
                           onChange={(e) =>
                             setNewChoice({
                               ...newChoice,
-                              price: parseFloat(e.target.value) || 0,
+                              price: e.target.value,
                             })
                           }
-                          placeholder="Enter amount"
+                          placeholder="0"
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-orange/20 focus:border-primary-orange"
                         />
                       </div>
@@ -520,7 +520,7 @@ function AddOption() {
                   type="button"
                   onClick={() => {
                     setShowAddChoiceModal(false);
-                    setNewChoice({ name: "", priceType: "noChange", price: 0 });
+                    setNewChoice({ name: "", priceType: "noChange", price: "" });
                   }}
                   className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
                   Cancel
