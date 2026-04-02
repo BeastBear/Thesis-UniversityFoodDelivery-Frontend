@@ -256,14 +256,14 @@ function CategoryManagement({ embedded }) {
 
       {/* Add/Edit Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-3xl p-6 w-full max-w-md">
-            <h2 className="text-xl font-bold mb-4">
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-[2rem] p-7 w-full max-w-[340px] shadow-2xl">
+            <h2 className="text-[#2d3748] text-xl font-extrabold mb-5">
               {editingCategory ? "Edit Category" : "Add Category"}
             </h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-semibold text-[#4a5568] mb-2">
                   Category Name
                 </label>
                 <input
@@ -273,80 +273,12 @@ function CategoryManagement({ embedded }) {
                   onChange={(e) =>
                     setFormData({ ...formData, name: e.target.value })
                   }
-                  className="w-full px-4 py-3 border border-gray-200 rounded-2xl focus:outline-none focus:ring-4"
-                  style={{
-                    "--tw-ring-color": "var(--color-primary-shadow-light)",
-                  }}
-                  onFocus={(e) => {
-                    e.currentTarget.style.borderColor = "var(--color-primary)";
-                    e.currentTarget.style.boxShadow =
-                      "0 0 0 4px var(--color-primary-shadow-light)";
-                  }}
-                  onBlur={(e) => {
-                    e.currentTarget.style.borderColor = "";
-                    e.currentTarget.style.boxShadow = "";
-                  }}
+                  className="w-full px-5 py-3 border border-gray-200 rounded-[1.25rem] focus:outline-none focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 text-gray-800 placeholder-gray-400 font-medium"
                   placeholder="Enter category name"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Order
-                </label>
-                <input
-                  type="number"
-                  value={formData.order}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      order: parseInt(e.target.value) || 0,
-                    })
-                  }
-                  className="w-full px-4 py-3 border border-gray-200 rounded-2xl focus:outline-none focus:ring-4"
-                  style={{
-                    "--tw-ring-color": "var(--color-primary-shadow-light)",
-                  }}
-                  onFocus={(e) => {
-                    e.currentTarget.style.borderColor = "var(--color-primary)";
-                    e.currentTarget.style.boxShadow =
-                      "0 0 0 4px var(--color-primary-shadow-light)";
-                  }}
-                  onBlur={(e) => {
-                    e.currentTarget.style.borderColor = "";
-                    e.currentTarget.style.boxShadow = "";
-                  }}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Icon
-                </label>
-                <select
-                  value={formData.icon}
-                  onChange={(e) =>
-                    setFormData({ ...formData, icon: e.target.value })
-                  }
-                  className="w-full px-4 py-3 border border-gray-200 rounded-2xl focus:outline-none focus:ring-4"
-                  style={{
-                    "--tw-ring-color": "var(--color-primary-shadow-light)",
-                  }}
-                  onFocus={(e) => {
-                    e.currentTarget.style.borderColor = "var(--color-primary)";
-                    e.currentTarget.style.boxShadow =
-                      "0 0 0 4px var(--color-primary-shadow-light)";
-                  }}
-                  onBlur={(e) => {
-                    e.currentTarget.style.borderColor = "";
-                    e.currentTarget.style.boxShadow = "";
-                  }}>
-                  <option value="">Select Icon</option>
-                  <option value="utensils">Utensils</option>
-                  <option value="bolt">Bolt</option>
-                  <option value="note">Note</option>
-                  <option value="folder">Folder</option>
-                </select>
-              </div>
-              <div className="flex gap-3">
+
+              <div className="flex gap-3 pt-1">
                 <button
                   type="button"
                   onClick={() => {
@@ -354,12 +286,14 @@ function CategoryManagement({ embedded }) {
                     setEditingCategory(null);
                     setFormData({ name: "", order: 0, icon: "" });
                   }}
-                  className="flex-1 px-4 py-3 border border-gray-200 rounded-2xl hover:bg-white font-bold">
+                  className="flex-1 py-3.5 bg-white border border-gray-200 text-[#1a202c] font-extrabold rounded-[1.25rem] hover:bg-gray-50 focus:outline-none transition-colors">
                   Cancel
                 </button>
-                <PrimaryButton type="submit" className="flex-1">
+                <button 
+                  type="submit" 
+                  className="flex-1 py-3.5 bg-[#10B981] text-white font-extrabold rounded-[1.25rem] hover:bg-[#059669] focus:outline-none transition-colors shadow-lg shadow-[#10B981]/30">
                   {editingCategory ? "Update" : "Add"}
-                </PrimaryButton>
+                </button>
               </div>
             </form>
           </div>
