@@ -8,6 +8,33 @@ import ShopNotificationsView from "../components/Notifications/ShopNotifications
 import DelivererNotificationsView from "../components/Notifications/DelivererNotificationsView";
 
 const NotificationsPage = () => {
+  const { userData } = useSelector((state) => state.user);
+  const role = userData?.role || "user";
+
+  const allowedTypes = React.useMemo(() => {
+    if (role === "admin")
+      return [
+        "system",
+        "order_update",
+        "promo",
+        "ticket",
+        "verification",
+        "payout",
+      ];
+    if (role === "deliveryBoy")
+      return ["delivery_assignment", "order_update", "system"];
+    if (role === "owner")
+      return [
+        "order_update",
+        "system",
+        "promo",
+        "verification",
+        "payout",
+      ];
+    // Standard user
+    return ["order_update", "system", "promo"];
+  }, [role]);
+
   const {
     notifications,
     loading,
@@ -15,11 +42,9 @@ const NotificationsPage = () => {
     loadMore,
     markAsRead,
     markAllAsRead,
-  } = useNotifications();
-  const navigate = useNavigate();
-  const { userData } = useSelector((state) => state.user);
+  } = useNotifications(allowedTypes);
 
-  const role = userData?.role || "user";
+  const navigate = useNavigate();
 
   // Auto-mark all as read for deliverers when page loads
   React.useEffect(() => {

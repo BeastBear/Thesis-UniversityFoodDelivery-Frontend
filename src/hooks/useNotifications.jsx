@@ -3,7 +3,7 @@ import axios from "axios";
 import { serverUrl } from "../App";
 import { useSelector } from "react-redux";
 
-const useNotifications = () => {
+const useNotifications = (allowedTypes = []) => {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -11,14 +11,17 @@ const useNotifications = () => {
   const [hasMore, setHasMore] = useState(true);
   const { userData, socket } = useSelector((state) => state.user);
 
+  const typesKey = JSON.stringify(allowedTypes);
+
   const fetchNotifications = useCallback(
     async (pageNum = 1, append = false) => {
       if (!userData) return;
 
       try {
         setLoading(true);
+        const typesParam = allowedTypes.length > 0 ? `&types=${allowedTypes.join(",")}` : "";
         const res = await axios.get(
-          `${serverUrl}/api/notifications?page=${pageNum}&limit=20`,
+          `${serverUrl}/api/notifications?page=${pageNum}&limit=20${typesParam}`,
           {
             withCredentials: true,
           },
@@ -39,7 +42,7 @@ const useNotifications = () => {
         setLoading(false);
       }
     },
-    [userData],
+    [userData, typesKey],
   );
 
   const markAsRead = async (id) => {
@@ -93,7 +96,16 @@ const useNotifications = () => {
   useEffect(() => {
     if (!socket) return;
 
-    const handleNotification = () => {
+    const handleNotification = (newNotif) => {
+      // Only process if it matches allowedTypes (if specified)
+      if (
+        allowedTypes.length > 0 &&
+        newNotif?.type &&
+        !allowedTypes.includes(newNotif.type)
+      ) {
+        return;
+      }
+
       try {
         const audio = new Audio("/notification1.mp3");
         audio.play().catch(() => {});
@@ -103,20 +115,12 @@ const useNotifications = () => {
       fetchNotifications(1);
     };
 
-    socket.on("newOrder", handleNotification);
-    socket.on("update-status", handleNotification);
-    socket.on("delivery-assignment", handleNotification);
-    socket.on("order-updated", handleNotification);
     socket.on("notification", handleNotification);
 
     return () => {
-      socket.off("newOrder", handleNotification);
-      socket.off("update-status", handleNotification);
-      socket.off("delivery-assignment", handleNotification);
-      socket.off("order-updated", handleNotification);
       socket.off("notification", handleNotification);
     };
-  }, [socket, fetchNotifications]);
+  }, [socket, fetchNotifications, allowedTypes]);
 
   return {
     notifications,

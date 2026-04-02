@@ -32,7 +32,14 @@ const AdminLayout = () => {
     fetchNotifications,
     markAsRead,
     markAllAsRead,
-  } = useNotifications();
+  } = useNotifications([
+    "system",
+    "order_update",
+    "promo",
+    "ticket",
+    "verification",
+    "payout",
+  ]);
 
   const handleLogout = () => {
     dispatch(setUserData(null));
@@ -208,14 +215,35 @@ const AdminLayout = () => {
                           </button>
                         </div>
                         <div className="max-h-96 overflow-y-auto">
-                          {notifications.length === 0 ? (
+                          {notifications.filter((n) =>
+                            new Set([
+                              "system",
+                              "order_update",
+                              "promo",
+                              "ticket",
+                              "verification",
+                              "payout",
+                            ]).has(n.type),
+                          ).length === 0 ? (
                             <div className="p-8 text-center">
                               <p className="text-gray-500 font-bold">
                                 No notifications
                               </p>
                             </div>
                           ) : (
-                            notifications.slice(0, 6).map((n) => (
+                            notifications
+                              .filter((n) =>
+                                new Set([
+                                  "system",
+                                  "order_update",
+                                  "promo",
+                                  "ticket",
+                                  "verification",
+                                  "payout",
+                                ]).has(n.type),
+                              )
+                              .slice(0, 6)
+                              .map((n) => (
                               <button
                                 key={n._id}
                                 type="button"
@@ -439,14 +467,35 @@ const AdminLayout = () => {
                         </button>
                       </div>
                       <div className="max-h-80 overflow-y-auto">
-                        {notifications.length === 0 ? (
+                        {notifications.filter((n) =>
+                          new Set([
+                            "system",
+                            "order_update",
+                            "promo",
+                            "ticket",
+                            "verification",
+                            "payout",
+                          ]).has(n.type),
+                        ).length === 0 ? (
                           <div className="p-6 text-center">
                             <p className="text-gray-500 text-sm font-bold">
                               No notifications
                             </p>
                           </div>
                         ) : (
-                          notifications.slice(0, 6).map((n) => (
+                          notifications
+                            .filter((n) =>
+                              new Set([
+                                "system",
+                                "order_update",
+                                "promo",
+                                "ticket",
+                                "verification",
+                                "payout",
+                              ]).has(n.type),
+                            )
+                            .slice(0, 6)
+                            .map((n) => (
                             <button
                               key={n._id}
                               type="button"

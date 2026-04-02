@@ -14,6 +14,18 @@ import {
 
 const AdminNotifications = () => {
   const navigate = useNavigate();
+  const adminTypes = React.useMemo(
+    () => [
+      "system",
+      "order_update",
+      "promo",
+      "ticket",
+      "verification",
+      "payout",
+    ],
+    [],
+  );
+
   const {
     notifications,
     loading,
@@ -21,20 +33,9 @@ const AdminNotifications = () => {
     loadMore,
     markAsRead,
     markAllAsRead,
-  } = useNotifications();
+  } = useNotifications(adminTypes);
 
-  const visibleNotifications = (notifications || []).filter((n) => {
-    const type = String(n?.type || "");
-    if (!type) return true;
-    return new Set([
-      "system",
-      "order_update",
-      "promo",
-      "ticket",
-      "verification",
-      "payout",
-    ]).has(type);
-  });
+  const visibleNotifications = notifications || [];
 
   const handleNotificationClick = async (notification) => {
     if (!notification?.isRead) {

@@ -28,7 +28,13 @@ function PartnerLayout() {
     markAsRead,
     markAllAsRead,
     fetchNotifications,
-  } = useNotifications();
+  } = useNotifications([
+    "order_update",
+    "system",
+    "promo",
+    "verification",
+    "payout",
+  ]);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const notifRef = useRef(null);
 
