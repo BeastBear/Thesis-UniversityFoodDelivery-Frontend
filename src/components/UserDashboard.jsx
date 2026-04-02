@@ -464,14 +464,6 @@ function UserDashboard() {
               Based on your taste and location
             </p>
           </div>
-          <div className="flex gap-2">
-            <button className="w-10 h-10 rounded-full border-none shadow-sm flex items-center justify-center text-gray-400 hover:bg-white hover:text-primary-orange transition-all hover:scale-105">
-              <FaArrowRight className="rotate-180" size={14} />
-            </button>
-            <button className="w-10 h-10 rounded-full border-none shadow-sm flex items-center justify-center text-gray-400 hover:bg-white hover:text-primary-orange transition-all hover:scale-105">
-              <FaArrowRight size={14} />
-            </button>
-          </div>
         </div>
 
         {isShopLoading ? (

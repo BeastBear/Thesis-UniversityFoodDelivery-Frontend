@@ -36,13 +36,12 @@ function useGetCurrentUser() {
         }
       } catch (error) {
 
-        // Only clear user data on auth failure if we get a 401/403
-        // AND we don't already have userData (to prevent clearing after signin)
-        if ((error.response?.status === 401 || error.response?.status === 403) && !userData) {
-        dispatch(setUserData(null));
-        dispatch(setCurrentCafeteria(null));
-        dispatch(setShopsInMyCity(null));
-        dispatch(setItemsInMyCity(null));
+        // Clear user data on any auth failure (401/403) so logout persists on refresh
+        if (error.response?.status === 401 || error.response?.status === 403) {
+          dispatch(setUserData(null));
+          dispatch(setCurrentCafeteria(null));
+          dispatch(setShopsInMyCity(null));
+          dispatch(setItemsInMyCity(null));
         }
       } finally {
         // Always set loading to false
