@@ -10,9 +10,34 @@ import { MdAccountBalanceWallet, MdAdd } from "react-icons/md";
 import { setUserData } from "../redux/userSlice";
 import DeliveryPageHero from "../components/Delivery/DeliveryPageHero";
 import { toast } from "react-toastify";
+import { loadStripe } from "@stripe/stripe-js";
+import { Elements, CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
+import { FaCcVisa, FaCcMastercard, FaCreditCard, FaQrcode } from "react-icons/fa";
 
-function DeliveryBoyFinance() {
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+
+function DeliveryBoyFinanceContent() {
+  const stripe = useStripe();
+  const elements = useElements();
   const { userData, socket } = useSelector((state) => state.user);
+
+  const CARD_ELEMENT_OPTIONS = {
+    style: {
+      base: {
+        color: "#32325d",
+        fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
+        fontSmoothing: "antialiased",
+        fontSize: "16px",
+        "::placeholder": {
+          color: "#aab7c4",
+        },
+      },
+      invalid: {
+        color: "#fa755a",
+        iconColor: "#fa755a",
+      },
+    },
+  };
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
@@ -31,6 +56,17 @@ function DeliveryBoyFinance() {
   const [showPayoutModal, setShowPayoutModal] = useState(false);
   const [payoutAmount, setPayoutAmount] = useState("");
   const [payoutLoading, setPayoutLoading] = useState(false);
+  const [promptPayQrUrl, setPromptPayQrUrl] = useState("");
+  const [pollingClientSecret, setPollingClientSecret] = useState(null);
+  const [pollingIntentId, setPollingIntentId] = useState(null);
+
+  // Helper to get default card
+  const defaultCard = React.useMemo(() => {
+    if (userData?.savedCards?.length > 0) {
+      return userData.savedCards.find((c) => c.isDefault) || userData.savedCards[0];
+    }
+    return null;
+  }, [userData]);
 
   useEffect(() => {
     if (!showTopUpModal) return;
@@ -59,6 +95,38 @@ function DeliveryBoyFinance() {
     }
   }, [isProcessing]);
 
+  // Handle PromptPay Polling
+  useEffect(() => {
+    let intervalId;
+    if (pollingClientSecret && showTopUpModal) {
+      intervalId = setInterval(async () => {
+        try {
+          const stripe = await stripePromise;
+          const { paymentIntent } = await stripe.retrievePaymentIntent(pollingClientSecret);
+          if (paymentIntent && paymentIntent.status === "succeeded") {
+            clearInterval(intervalId);
+            setPollingClientSecret(null);
+            setPromptPayQrUrl("");
+            setShowTopUpModal(false);
+            setTopUpAmount("");
+            toast.success("Top up successful!");
+            fetchFinancialData();
+            
+            // Cleanup URL params if any
+            if (window.location.search) {
+               navigate("/delivery-boy-finance", { replace: true });
+            }
+          }
+        } catch (error) {
+          console.error("Polling error:", error);
+        }
+      }, 3000);
+    }
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [pollingClientSecret, showTopUpModal, fetchFinancialData, navigate]);
+
   // Handle Escape key to close modal
   useEffect(() => {
     const handleEscape = (e) => {
@@ -66,6 +134,8 @@ function DeliveryBoyFinance() {
         setShowTopUpModal(false);
         setTopUpAmount("");
         setIsProcessing(false);
+        setPromptPayQrUrl("");
+        setPollingClientSecret(null);
       }
     };
     window.addEventListener("keydown", handleEscape);
@@ -389,13 +459,31 @@ function DeliveryBoyFinance() {
     }
   };
 
+  const calculateFees = (amount, method) => {
+    if (!amount || isNaN(amount)) return { fee: 0, total: 0 };
+    const numAmount = parseFloat(amount);
+    let fee = 0;
+    if (method === "promptpay") {
+      // PromptPay: 1.65% + 7% VAT
+      const baseFee = numAmount * 0.0165;
+      const vat = baseFee * 0.07;
+      fee = baseFee + vat;
+    } else if (method === "card") {
+      // Card: 4.75% + 10B + 7% VAT
+      const baseFee = numAmount * 0.0475 + 10;
+      const vat = baseFee * 0.07;
+      fee = baseFee + vat;
+    }
+    return {
+      fee: Math.round(fee * 100) / 100,
+      total: Math.round((numAmount + fee) * 100) / 100,
+    };
+  };
+
   const handleTopUpCredit = async (amount = null) => {
     // Prevent multiple simultaneous requests
-    if (isProcessing) {
-      return;
-    }
+    if (isProcessing) return;
 
-    // If amount is provided (from quick button), use it; otherwise use topUpAmount state
     const finalAmount = amount !== null ? amount : parseFloat(topUpAmount);
 
     if (!finalAmount || finalAmount <= 0) {
@@ -410,33 +498,107 @@ function DeliveryBoyFinance() {
 
     setIsProcessing(true);
     try {
-      const result = await axios.post(
-        `${serverUrl}/api/user/create-credit-topup-session`,
-        { amount: finalAmount, paymentMethod: topUpPaymentMethod },
-        { withCredentials: true, timeout: 10000 }, // 10 second timeout
-      );
+      const stripe = await stripePromise;
 
-      // Redirect to Stripe Checkout (same as order payment)
-      if (result.data?.url) {
-        // Close modal and reset state before redirecting
-        setShowTopUpModal(false);
-        setTopUpAmount("");
-        setIsProcessing(false);
-        // Small delay to ensure state updates before redirect
-        setTimeout(() => {
-          window.location.href = result.data.url;
-        }, 100);
+      if (topUpPaymentMethod === "card" && defaultCard?.stripePaymentMethodId) {
+        // Use saved card
+        const response = await axios.post(
+          `${serverUrl}/api/user/charge-saved-card-topup`,
+          { amount: finalAmount, paymentMethodId: defaultCard.stripePaymentMethodId },
+          { withCredentials: true }
+        );
+
+        if (response.data.status === "succeeded") {
+          toast.success("Top up successful!");
+          setShowTopUpModal(false);
+          setTopUpAmount("");
+          fetchFinancialData();
+        } else if (response.data.status === "requires_action") {
+          const { error, paymentIntent } = await stripe.handleNextAction({
+            clientSecret: response.data.clientSecret,
+          });
+
+          if (error) {
+            toast.error(error.message);
+          } else if (paymentIntent && paymentIntent.status === "succeeded") {
+            // Verify on backend
+            await axios.post(
+              `${serverUrl}/api/user/verify-credit-topup`,
+              { paymentIntentId: paymentIntent.id },
+              { withCredentials: true }
+            );
+            toast.success("Top up successful!");
+            setShowTopUpModal(false);
+            setTopUpAmount("");
+            fetchFinancialData();
+          }
+        }
+      } else if (topUpPaymentMethod === "promptpay") {
+        // PromptPay
+        const response = await axios.post(
+          `${serverUrl}/api/user/create-topup-payment-intent`,
+          { amount: finalAmount, paymentMethod: "promptpay" },
+          { withCredentials: true }
+        );
+
+        const { clientSecret } = response.data;
+        const { error, paymentIntent } = await stripe.confirmPromptPayPayment(
+          clientSecret,
+          {
+            payment_method: {
+              type: 'promptpay',
+              billing_details: {
+                email: userData?.email || "guest@example.com"
+              }
+            }
+          }
+        );
+
+        if (error) {
+          toast.error(error.message);
+        } else if (paymentIntent && paymentIntent.next_action?.promptpay_display_qr_code) {
+          setPromptPayQrUrl(paymentIntent.next_action.promptpay_display_qr_code.image_url_png);
+          setPollingClientSecret(clientSecret);
+        } else if (paymentIntent && paymentIntent.status === 'succeeded') {
+          toast.success("Top up successful!");
+          setShowTopUpModal(false);
+          setTopUpAmount("");
+          fetchFinancialData();
+        }
       } else {
-        throw new Error("No checkout URL received from server");
+        // New Card inline confirmation
+        if (!stripe || !elements) return;
+        
+        const response = await axios.post(
+          `${serverUrl}/api/user/create-topup-payment-intent`,
+          { amount: finalAmount, paymentMethod: "card" },
+          { withCredentials: true }
+        );
+
+        const { clientSecret } = response.data;
+        const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+          payment_method: {
+            card: elements.getElement(CardElement),
+            billing_details: {
+              email: userData?.email || "guest@example.com"
+            }
+          }
+        });
+
+        if (error) {
+          toast.error(error.message);
+        } else if (paymentIntent && paymentIntent.status === "succeeded") {
+          toast.success("Top up successful!");
+          setShowTopUpModal(false);
+          setTopUpAmount("");
+          fetchFinancialData();
+        }
       }
     } catch (error) {
-      const errorMessage =
-        error.response?.data?.message ||
-        error.message ||
-        "Failed to initialize payment. Please try again.";
-      toast.error(`Error: ${errorMessage}`);
+      const errorMessage = error.response?.data?.message || error.message || "Payment failed";
+      toast.error(errorMessage);
+    } finally {
       setIsProcessing(false);
-      // Keep modal open so user can try again
     }
   };
 
@@ -797,108 +959,129 @@ function DeliveryBoyFinance() {
                               </button>
                             ))}
                           </div>
-                        </div>
-
-                        {/* Payment Method Selection */}
+                                {/* Payment Method Selection */}
                         <div className="mb-6">
-                          <label className="block text-xs font-black tracking-[0.14em] text-slate-500 mb-2">
-                            Payment Method
+                          <label className="block text-xs font-black tracking-[0.14em] text-slate-500 mb-3">
+                            SELECT PAYMENT METHOD
                           </label>
-                          <div className="flex gap-4">
-                            <label
-                              className={`flex-1 border rounded-2xl p-3 cursor-pointer transition-all ${
+                          <div className="grid grid-cols-1 gap-3">
+                            {/* PromptPay Option */}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setTopUpPaymentMethod("promptpay");
+                                setPromptPayQrUrl("");
+                                setPollingClientSecret(null);
+                              }}
+                              className={`w-full flex items-center justify-between p-4 rounded-2xl border-2 transition-all ${
                                 topUpPaymentMethod === "promptpay"
-                                  ? "border-blue-600 bg-blue-50 ring-1 ring-blue-600"
-                                  : "border-slate-200 hover:border-slate-300"
-                              }`}>
-                              <div className="flex items-center gap-3">
-                                <input
-                                  type="radio"
-                                  name="paymentMethod"
-                                  value="promptpay"
-                                  checked={topUpPaymentMethod === "promptpay"}
-                                  onChange={(e) =>
-                                    setTopUpPaymentMethod(e.target.value)
-                                  }
-                                  className="w-4 h-4 text-blue-600 focus:ring-blue-600"
-                                />
-                                <div>
-                                  <span className="block text-sm font-medium text-gray-900">
-                                    PromptPay
-                                  </span>
-                                  <span className="block text-xs text-gray-500">
-                                    Fee: 1.65% + 7% VAT
-                                  </span>
+                                  ? "border-blue-600 bg-blue-50/50 shadow-sm"
+                                  : "border-slate-100 hover:border-slate-200"
+                              }`}
+                            >
+                              <div className="flex items-center gap-4">
+                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                                  topUpPaymentMethod === "promptpay" ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-500"
+                                }`}>
+                                  <FaQrcode size={20} />
+                                </div>
+                                <div className="text-left">
+                                  <div className="text-sm font-extrabold text-slate-900">PromptPay</div>
+                                  <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Fee: 1.65% + 7% VAT</div>
                                 </div>
                               </div>
-                            </label>
+                              {topUpPaymentMethod === "promptpay" && (
+                                <div className="w-5 h-5 rounded-full bg-blue-600 flex items-center justify-center">
+                                  <div className="w-2 h-2 rounded-full bg-white" />
+                                </div>
+                              )}
+                            </button>
 
-                            <label
-                              className={`flex-1 border rounded-2xl p-3 cursor-pointer transition-all ${
+                            {/* Card Option (Saved Card if exists) */}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setTopUpPaymentMethod("card");
+                                setPromptPayQrUrl("");
+                                setPollingClientSecret(null);
+                              }}
+                              className={`w-full flex items-center justify-between p-4 rounded-2xl border-2 transition-all ${
                                 topUpPaymentMethod === "card"
-                                  ? "border-blue-600 bg-blue-50 ring-1 ring-blue-600"
-                                  : "border-slate-200 hover:border-slate-300"
-                              }`}>
-                              <div className="flex items-center gap-3">
-                                <input
-                                  type="radio"
-                                  name="paymentMethod"
-                                  value="card"
-                                  checked={topUpPaymentMethod === "card"}
-                                  onChange={(e) =>
-                                    setTopUpPaymentMethod(e.target.value)
-                                  }
-                                  className="w-4 h-4 text-blue-600 focus:ring-blue-600"
-                                />
-                                <div>
-                                  <span className="block text-sm font-medium text-gray-900">
-                                    Card
-                                  </span>
-                                  <span className="block text-xs text-gray-500">
-                                    Fee: 4.75% + 10฿ + 7% VAT
-                                  </span>
+                                  ? "border-blue-600 bg-blue-50/50 shadow-sm"
+                                  : "border-slate-100 hover:border-slate-200"
+                              }`}
+                            >
+                              <div className="flex items-center gap-4">
+                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                                  topUpPaymentMethod === "card" ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-500"
+                                }`}>
+                                  {defaultCard ? (
+                                    defaultCard.brand?.toLowerCase() === "visa" ? <FaCcVisa size={24} /> :
+                                    defaultCard.brand?.toLowerCase() === "mastercard" ? <FaCcMastercard size={24} /> :
+                                    <FaCreditCard size={20} />
+                                  ) : (
+                                    <FaCreditCard size={20} />
+                                  )}
+                                </div>
+                                <div className="text-left">
+                                  <div className="text-sm font-extrabold text-slate-900">
+                                    {defaultCard ? `•••• ${defaultCard.last4}` : "Credit/Debit Card"}
+                                  </div>
+                                  <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Fee: 4.75% + 10฿ + 7% VAT</div>
                                 </div>
                               </div>
-                            </label>
+                              {topUpPaymentMethod === "card" && (
+                                <div className="w-5 h-5 rounded-full bg-blue-600 flex items-center justify-center">
+                                  <div className="w-2 h-2 rounded-full bg-white" />
+                                </div>
+                              )}
+                            </button>
                           </div>
+                          
+                          {/* Inline Card Element for New Card */}
+                          {topUpPaymentMethod === "card" && !defaultCard && (
+                            <div className="mt-4 animate-in fade-in zoom-in duration-300">
+                              <label className="block text-xs font-black tracking-[0.14em] text-slate-500 mb-2">
+                                CARD DETAILS
+                              </label>
+                              <div className="p-4 border-2 border-slate-200 rounded-2xl bg-white shadow-sm focus-within:border-blue-600 focus-within:ring-2 focus-within:ring-blue-600/20 transition-all">
+                                <CardElement options={CARD_ELEMENT_OPTIONS} />
+                              </div>
+                            </div>
+                          )}
                         </div>
 
                         {/* Fee Breakdown */}
                         {topUpAmount && parseFloat(topUpAmount) > 0 && (
-                          <div className="mb-6 bg-slate-50 rounded-2xl p-4 border border-slate-100">
-                            <div className="flex justify-between text-sm text-slate-600 mb-2">
-                              <span>Top Up Amount:</span>
-                              <span>฿{parseFloat(topUpAmount).toFixed(2)}</span>
+                          <div className="mb-6 space-y-3 bg-slate-50/50 rounded-2xl p-5 border border-slate-100">
+                            <div className="flex justify-between items-center text-sm">
+                              <span className="font-bold text-slate-500">Amount</span>
+                              <span className="font-extrabold text-slate-900">฿{parseFloat(topUpAmount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                             </div>
-                            <div className="flex justify-between text-sm text-slate-600 mb-2">
-                              <span>
-                                Fee (
-                                {topUpPaymentMethod === "card"
-                                  ? "4.75% + 10฿ + 7% VAT"
-                                  : "1.65% + 7% VAT"}
-                                ):
-                              </span>
-                              <span>
-                                ฿
-                                {(topUpPaymentMethod === "card"
-                                  ? (parseFloat(topUpAmount) * 0.0475 + 10) *
-                                    1.07
-                                  : parseFloat(topUpAmount) * 0.0165 * 1.07
-                                ).toFixed(2)}
-                              </span>
+                            <div className="flex justify-between items-center text-sm">
+                              <span className="font-bold text-slate-500">Service Fee</span>
+                              <span className="font-extrabold text-slate-900">฿{calculateFees(topUpAmount, topUpPaymentMethod).fee.toFixed(2)}</span>
                             </div>
-                            <div className="flex justify-between text-base font-semibold text-slate-900 border-t border-slate-200 pt-2 mt-2">
-                              <span>Total to Pay:</span>
-                              <span>
-                                ฿
-                                {(
-                                  parseFloat(topUpAmount) +
-                                  (topUpPaymentMethod === "card"
-                                    ? (parseFloat(topUpAmount) * 0.0475 + 10) *
-                                      1.07
-                                    : parseFloat(topUpAmount) * 0.0165 * 1.07)
-                                ).toFixed(2)}
-                              </span>
+                            <div className="pt-3 border-t border-slate-200 flex justify-between items-center">
+                              <span className="font-black text-xs tracking-widest text-slate-400 uppercase">Total to Pay</span>
+                              <span className="text-xl font-black text-blue-600">฿{calculateFees(topUpAmount, topUpPaymentMethod).total.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Inline QR Code for PromptPay */}
+                        {promptPayQrUrl && topUpPaymentMethod === "promptpay" && (
+                          <div className="mt-4 p-6 bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200 flex flex-col items-center animate-in fade-in zoom-in duration-300">
+                            <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+                              <img src={promptPayQrUrl} alt="PromptPay QR Code" className="w-48 h-48 md:w-56 md:h-56" />
+                            </div>
+                            <div className="mt-5 text-center">
+                              <p className="text-sm font-extrabold text-slate-900">Scan to Top Up</p>
+                              <p className="text-xs font-bold text-slate-500 mt-1">Please keep this window open until payment is confirmed.</p>
+                              <div className="mt-4 flex items-center justify-center gap-2 text-blue-600 font-bold text-xs uppercase tracking-widest">
+                                <div className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
+                                Waiting for payment...
+                              </div>
                             </div>
                           </div>
                         )}
@@ -915,7 +1098,8 @@ function DeliveryBoyFinance() {
                       disabled={
                         isProcessing ||
                         !topUpAmount ||
-                        parseFloat(topUpAmount) <= 0
+                        parseFloat(topUpAmount) <= 0 ||
+                        (topUpPaymentMethod === "promptpay" && !!promptPayQrUrl)
                       }
                       className="w-full min-h-[52px] rounded-2xl bg-blue-600 text-white font-extrabold hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-[0_14px_34px_rgba(37,99,235,0.25)]">
                       {isProcessing ? (
@@ -924,7 +1108,7 @@ function DeliveryBoyFinance() {
                           <span>Processing...</span>
                         </>
                       ) : (
-                        "Top Up"
+                        topUpPaymentMethod === "promptpay" && promptPayQrUrl ? "Waiting for Payment..." : "Top Up"
                       )}
                     </button>
 
@@ -940,8 +1124,9 @@ function DeliveryBoyFinance() {
                     </div>
                   </div>
                 </div>
-              </div>
             </div>
+          </div>
+          </div>
           </div>
         )}
       </div>
@@ -949,4 +1134,10 @@ function DeliveryBoyFinance() {
   );
 }
 
-export default DeliveryBoyFinance;
+export default function DeliveryBoyFinance() {
+  return (
+    <Elements stripe={stripePromise}>
+      <DeliveryBoyFinanceContent />
+    </Elements>
+  );
+}
