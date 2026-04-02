@@ -176,7 +176,7 @@ function SettingPage() {
     }
 
     try {
-      const result = await axios.get(`${serverUrl}/api/auth/signout`, {
+      const result = await axios.get(`${serverUrl}/api/auth/signOut`, {
         withCredentials: true,
       });
       dispatch(setUserData(null));

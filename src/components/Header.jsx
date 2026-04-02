@@ -82,7 +82,7 @@ const HeaderLayout = () => {
 
   const handleLogout = async () => {
     try {
-      await axios.get(`${serverUrl}/api/auth/signout`, {
+      await axios.get(`${serverUrl}/api/auth/signOut`, {
         withCredentials: true,
       });
     } catch (error) {

@@ -631,7 +631,7 @@ function DeliveryBoy() {
     }
 
     try {
-      await axios.get(`${serverUrl}/api/auth/signout`, {
+      await axios.get(`${serverUrl}/api/auth/signOut`, {
         withCredentials: true,
       });
       dispatch(setUserData(null));
