@@ -226,27 +226,7 @@ function Restaurant() {
     }
   };
 
-  const promoBadges = [];
-  const hasOnlineDiscount = (items || []).some(
-    (i) =>
-      i?.isAvailable !== false &&
-      typeof i?.onlinePrice === "number" &&
-      typeof i?.price === "number" &&
-      i.onlinePrice > 0 &&
-      i.onlinePrice < i.price,
-  );
-  if (hasOnlineDiscount) {
-    promoBadges.push({
-      icon: <FaFire className="text-orange-600" />,
-      text: "Deals available",
-    });
-  }
-  if (shop?.note) {
-    promoBadges.push({
-      icon: <FaTicketAlt className="text-orange-600" />,
-      text: shop.note,
-    });
-  }
+
 
   return (
     <div className="bg-white min-h-screen pb-20">
@@ -329,22 +309,6 @@ function Restaurant() {
 
       {/* 2. Content Container - Fluid Width */}
       <div className="w-full px-4 sm:px-6 md:px-10 pt-6 pb-8 max-w-5xl mx-auto">
-        {/* Promo Section */}
-        {promoBadges.length > 0 && (
-          <div className="flex flex-wrap gap-3 mb-6">
-            {promoBadges.map((p, idx) => (
-              <div
-                key={idx}
-                className="flex items-center gap-2 border border-orange-100 bg-orange-50/50 px-3 py-1.5 rounded-full">
-                {p.icon}
-                <span className="text-xs font-bold text-orange-700">
-                  {p.text}
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
-
         {/* 3. Sticky Tabs & Search */}
         <div className="sticky top-16 sm:top-20 md:top-6 bg-white/95 backdrop-blur-xl z-30 pt-2 pb-4 mb-6 -mx-4 sm:-mx-6 px-4 sm:px-6 border-b border-gray-50 shadow-sm">
           <div className="w-full">

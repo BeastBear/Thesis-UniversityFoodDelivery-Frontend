@@ -100,7 +100,7 @@ function SignIn() {
           <Link
             to="/"
             className="inline-flex w-16 h-16 bg-gradient-to-tr from-primary-orange to-orange-400 rounded-2xl items-center justify-center mb-6 text-white text-3xl font-extrabold shadow-lg shadow-primary-orange/30 transform hover:scale-105 transition-transform duration-300">
-            V
+            U
           </Link>
           <h1 className="text-3xl font-extrabold text-gray-900 mb-2 tracking-tight">
             Welcome Back

@@ -487,7 +487,7 @@ function UserDashboard() {
         ) : (allShops || shopsInMyCity)?.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {(allShops || shopsInMyCity).map((shop) => {
-              // Distance from central cafeteria to user
+              // Distance from restaurant to user
               // Priority: Default Address -> First Saved Address -> GPS
               const savedAddresses = userData?.savedAddresses || [];
               const defaultAddress = savedAddresses.find((a) => a.isDefault);
@@ -499,20 +499,24 @@ function UserDashboard() {
               const userLon =
                 targetAddress?.location?.lon ||
                 userData?.location?.coordinates?.[0];
-              // Get the first available cafeteria location as origin
-              const firstCafeteria = cafeterias?.[0];
-              const cafeteriaOrigin = firstCafeteria
-                ? cafeteriaLocations[firstCafeteria]
-                : null;
 
-              if (!cafeteriaOrigin) return null;
+              // Priority: Shop location -> Shop's Cafe Location -> Default
+              let shopLat = shop?.location?.latitude;
+              let shopLon = shop?.location?.longitude;
 
-              const distance = calculateDistance(
-                cafeteriaOrigin.lat,
-                cafeteriaOrigin.lon,
-                userLat,
-                userLon,
-              );
+              if (!shopLat || !shopLon) {
+                const shopCafe = shop?.cafeteria;
+                if (shopCafe && cafeteriaLocations?.[shopCafe]) {
+                  shopLat = cafeteriaLocations[shopCafe].lat;
+                  shopLon = cafeteriaLocations[shopCafe].lon;
+                }
+              }
+
+              let distance = null;
+              if (shopLat && shopLon && userLat && userLon) {
+                distance = calculateDistance(shopLat, shopLon, userLat, userLon);
+              }
+
               const duration = distance ? Math.round(distance * 2 + 10) : null;
               const deliveryFee = (() => {
                 if (
