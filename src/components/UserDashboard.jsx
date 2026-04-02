@@ -399,7 +399,9 @@ function UserDashboard() {
               Choose from hundreds of options
             </p>
           </div>
-          <button className="text-primary-orange hover:text-primary-orange/90 text-sm font-bold hover:underline transition-colors flex items-center gap-1">
+          <button
+            onClick={() => navigate("/category/all")}
+            className="text-primary-orange hover:text-primary-orange/90 text-sm font-bold hover:underline transition-colors flex items-center gap-1">
             View All
             <FaArrowRight size={12} />
           </button>
@@ -410,11 +412,11 @@ function UserDashboard() {
             onClick={() => {
               navigate("/category/all");
             }}
-            className="min-w-[100px] snap-start flex flex-col items-center gap-3 cursor-pointer group transition-all">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center shadow-lg border transition-all group-hover:shadow-xl group-hover:-translate-y-1 group-hover:rotate-1 bg-linear-to-br from-gray-50 to-gray-100 border-gray-200">
+            className="w-[100px] shrink-0 snap-start flex flex-col items-center gap-3 cursor-pointer group transition-all">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center shadow-lg border transition-all group-hover:shadow-xl group-hover:-translate-y-1 group-hover:rotate-1 bg-linear-to-br from-gray-50 to-gray-100 border-gray-200 overflow-hidden">
               <IoRestaurant className="text-2xl sm:text-3xl text-gray-600 group-hover:text-primary-orange transition-colors" />
             </div>
-            <span className="font-semibold text-sm transition-colors whitespace-nowrap text-center text-gray-700 group-hover:text-primary-orange">
+            <span className="font-semibold text-xs sm:text-sm transition-colors text-center text-gray-700 group-hover:text-primary-orange whitespace-normal line-clamp-2 leading-tight">
               All
             </span>
           </div>
@@ -432,9 +434,9 @@ function UserDashboard() {
                     navigate(`/category/${categoryId}`);
                   }
                 }}
-                className="min-w-[100px] snap-start flex flex-col items-center gap-3 cursor-pointer group transition-all">
+                className="w-[100px] shrink-0 snap-start flex flex-col items-center gap-3 cursor-pointer group transition-all">
                 <div
-                  className={`w-16 h-16 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center shadow-lg border transition-all group-hover:shadow-xl group-hover:-translate-y-1 group-hover:rotate-1 ${
+                  className={`w-16 h-16 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center shadow-lg border transition-all overflow-hidden group-hover:shadow-xl group-hover:-translate-y-1 group-hover:rotate-1 ${
                     index % 3 === 0
                       ? "bg-linear-to-br from-primary-orange/10 to-primary-orange/20 border-none shadow-md"
                       : index % 3 === 1
@@ -444,10 +446,10 @@ function UserDashboard() {
                   <img
                     src={cate.image}
                     alt={cate.category}
-                    className="w-8 h-8 sm:w-10 sm:h-10 object-contain drop-shadow-sm transition-transform group-hover:scale-110"
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                   />
                 </div>
-                <span className="font-semibold text-sm transition-colors whitespace-nowrap text-center text-gray-700 group-hover:text-primary-orange">
+                <span className="font-semibold text-xs sm:text-sm transition-colors text-center text-gray-700 group-hover:text-primary-orange whitespace-normal line-clamp-2 leading-tight">
                   {cate.category}
                 </span>
               </div>
