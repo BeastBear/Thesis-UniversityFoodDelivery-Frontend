@@ -24,7 +24,7 @@ function AddItem() {
 
   // Form states
   const [nameEnglish, setNameEnglish] = useState("");
-  const [price, setPrice] = useState(0);
+  const [price, setPrice] = useState("");
   const [frontendImage, setFrontendImage] = useState(null);
   const [backendImage, setBackendImage] = useState(null);
   const [selectedCategories, setSelectedCategories] = useState([]);
@@ -66,7 +66,7 @@ function AddItem() {
       });
       const item = res.data;
       setNameEnglish(item.nameEnglish || "");
-      setPrice(item.onlinePrice || item.inStorePrice || item.price || 0);
+      setPrice(item.onlinePrice || item.inStorePrice || item.price || "");
       setFrontendImage(item.image || null);
       setSelectedCategories(item.categories || [item.categoryRef] || []);
       // Normalize option templates to just their IDs (API returns populated objects)
@@ -87,7 +87,7 @@ function AddItem() {
   useEffect(() => {
     if (!editId) {
       setNameEnglish("");
-      setPrice(0);
+      setPrice("");
       setFrontendImage(null);
       setBackendImage(null);
       setSelectedCategories([]);
@@ -172,7 +172,8 @@ function AddItem() {
       return;
     }
 
-    if (price <= 0) {
+    const parsedPrice = parseFloat(price);
+    if (!parsedPrice || parsedPrice <= 0) {
       toast.error("Please enter a valid price");
       return;
     }
@@ -182,7 +183,7 @@ function AddItem() {
       const formData = new FormData();
       formData.append("nameEnglish", nameEnglish.trim());
       formData.append("nameThai", "");
-      formData.append("price", price);
+      formData.append("price", parsedPrice);
       formData.append("category", selectedCategories[0] || ""); // Keep for backward compatibility
       formData.append("categories", JSON.stringify(selectedCategories));
       formData.append(
@@ -321,7 +322,7 @@ function AddItem() {
             <input
               type="number"
               value={price}
-              onChange={(e) => setPrice(parseFloat(e.target.value) || 0)}
+              onChange={(e) => setPrice(e.target.value)}
               placeholder="0"
               min="0"
               step="0.01"
@@ -474,28 +475,15 @@ function AddItem() {
           />
         </Card>
 
-        {/* Bottom Buttons */}
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 flex gap-3 md:hidden">
+        {/* Action Buttons */}
+        <div className="flex flex-col sm:flex-row gap-3 mt-8 pb-8">
           <button
             type="button"
             onClick={() => navigate(-1)}
             className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors">
             Cancel
           </button>
-          <PrimaryButton type="submit" disabled={loading} className="flex-1">
-            {loading ? <ClipLoader size={20} color="white" /> : "Save"}
-          </PrimaryButton>
-        </div>
-
-        {/* Desktop Buttons */}
-        <div className="hidden md:flex gap-3 mt-6">
-          <button
-            type="button"
-            onClick={() => navigate(-1)}
-            className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors">
-            Cancel
-          </button>
-          <PrimaryButton type="submit" disabled={loading} className="flex-1">
+          <PrimaryButton type="submit" disabled={loading} className="flex-1 shadow-lg">
             {loading ? <ClipLoader size={20} color="white" /> : "Save"}
           </PrimaryButton>
         </div>
