@@ -25,7 +25,8 @@ const AdminLayout = () => {
   const { userData } = useSelector((state) => state.user);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
   const [isNotifOpen, setIsNotifOpen] = React.useState(false);
-  const notifRef = React.useRef(null);
+  const notifRefDesktop = React.useRef(null);
+  const notifRefMobile = React.useRef(null);
   const {
     notifications,
     unreadCount,
@@ -75,10 +76,10 @@ const AdminLayout = () => {
     }
 
     const handleOutside = (e) => {
-      if (!notifRef.current) {
-        return;
-      }
-      if (!notifRef.current.contains(e.target)) {
+      const isInsideDesktop = notifRefDesktop.current?.contains(e.target);
+      const isInsideMobile = notifRefMobile.current?.contains(e.target);
+
+      if (!isInsideDesktop && !isInsideMobile) {
         setIsNotifOpen(false);
       }
     };
@@ -169,7 +170,7 @@ const AdminLayout = () => {
 
                 <div className="flex items-center gap-4">
                   {/* Notifications */}
-                  <div className="relative" ref={notifRef}>
+                  <div className="relative" ref={notifRefDesktop}>
                     <button
                       type="button"
                       onClick={() => {
@@ -423,7 +424,7 @@ const AdminLayout = () => {
                 </h2>
               </div>
               <div className="flex items-center gap-2">
-                <div className="relative" ref={notifRef}>
+                <div className="relative" ref={notifRefMobile}>
                   <button
                     type="button"
                     onClick={() => {

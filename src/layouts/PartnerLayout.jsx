@@ -36,7 +36,8 @@ function PartnerLayout() {
     "payout",
   ]);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
-  const notifRef = useRef(null);
+  const notifRefDesktop = useRef(null);
+  const notifRefMobile = useRef(null);
 
   const isMenuManagementRoute = (pathname) =>
     pathname.startsWith("/manage-menu") ||
@@ -107,10 +108,10 @@ function PartnerLayout() {
     }
 
     const handleOutside = (e) => {
-      if (!notifRef.current) {
-        return;
-      }
-      if (!notifRef.current.contains(e.target)) {
+      const isInsideDesktop = notifRefDesktop.current?.contains(e.target);
+      const isInsideMobile = notifRefMobile.current?.contains(e.target);
+
+      if (!isInsideDesktop && !isInsideMobile) {
         setIsNotifOpen(false);
       }
     };
@@ -206,7 +207,7 @@ function PartnerLayout() {
 
                 <div className="flex items-center gap-4">
                   {/* Notifications */}
-                  <div className="relative" ref={notifRef}>
+                  <div className="relative" ref={notifRefDesktop}>
                     <button
                       type="button"
                       onClick={() => {
@@ -372,7 +373,7 @@ function PartnerLayout() {
                 )}
               </div>
               <div className="flex items-center gap-2">
-                <div className="relative" ref={notifRef}>
+                <div className="relative" ref={notifRefMobile}>
                   <button
                     type="button"
                     onClick={() => {
