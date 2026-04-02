@@ -436,12 +436,11 @@ function CreateEditRestaurant() {
                     Restaurant Lot Number
                   </label>
                   <input
-                    type="tel"
-                    placeholder="+1234567890"
+                    type="number"
+                    placeholder="01"
                     className="w-full px-4 py-3 border border-gray-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-primary-orange/20 focus:border-primary-orange transition-all"
                     onChange={(e) => setShopNumber(e.target.value)}
                     value={shopNumber}
-                    pattern="[+]?[0-9]{10,15}"
                   />
                 </div>
               </div>
