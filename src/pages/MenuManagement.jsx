@@ -17,6 +17,7 @@ import Card from "../components/ui/Card";
 import EmptyState from "../components/ui/EmptyState";
 import PrimaryButton from "../components/ui/PrimaryButton";
 import { toast } from "react-toastify";
+import EditCategories from "./EditCategories";
 
 function MenuManagement() {
   const navigate = useNavigate();
@@ -475,38 +476,51 @@ function MenuManagement() {
             </button>
             <button
               type="button"
-              onClick={() => navigate("/manage-categories")}
-              className="flex-1 py-3 px-1 text-center font-bold text-[13px] sm:text-sm rounded-2xl transition-all bg-white text-gray-600 hover:bg-gray-100">
+              onClick={() => setActiveTab("categories")}
+              className={`flex-1 py-3 px-1 text-center font-bold text-[13px] sm:text-sm rounded-2xl transition-all ${
+                activeTab === "categories"
+                  ? "text-white shadow-lg"
+                  : "bg-white text-gray-600 hover:bg-gray-100"
+              }`}
+              style={
+                activeTab === "categories"
+                  ? {
+                      backgroundColor: "var(--color-primary)",
+                      boxShadow: "0 10px 25px -5px var(--color-primary-shadow)",
+                    }
+                  : {}
+              }>
               Categories
             </button>
           </div>
 
           {/* Search Bar & Actions */}
-          <div className="px-4 pb-4 flex flex-col gap-3">
-            <div className="relative">
-              <FaSearch
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                size={18}
-              />
-              <input
-                type="text"
-                placeholder="Search items"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-10 py-3 border border-gray-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-primary-orange/20 focus:border-primary-orange text-sm font-semibold text-gray-800 placeholder-gray-400"
-              />
-              {searchQuery?.trim()?.length > 0 && (
-                <button
-                  type="button"
-                  aria-label="Clear search"
-                  onClick={() => setSearchQuery("")}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors">
-                  ✕
-                </button>
-              )}
+          {activeTab !== "categories" && (
+            <div className="px-4 pb-4 flex flex-col gap-3">
+              <div className="relative">
+                <FaSearch
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                  size={18}
+                />
+                <input
+                  type="text"
+                  placeholder="Search items"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-10 py-3 border border-gray-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-primary-orange/20 focus:border-primary-orange text-sm font-semibold text-gray-800 placeholder-gray-400"
+                />
+                {searchQuery?.trim()?.length > 0 && (
+                  <button
+                    type="button"
+                    aria-label="Clear search"
+                    onClick={() => setSearchQuery("")}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors">
+                    ✕
+                  </button>
+                )}
+              </div>
             </div>
-            
-          </div>
+          )}
         </div>
       </div>
 
@@ -514,7 +528,7 @@ function MenuManagement() {
         <div className="max-w-7xl mx-auto px-4 pt-6">
           <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
             <div className="flex items-center justify-between gap-4 p-4">
-              <div className="flex items-center gap-2 bg-white border border-gray-100 rounded-2xl p-1 w-full max-w-[420px]">
+              <div className="flex items-center gap-2 bg-white border border-gray-100 rounded-2xl p-1 w-full max-w-[500px]">
                 <button
                   type="button"
                   onClick={() => setActiveTab("menu")}
@@ -553,40 +567,54 @@ function MenuManagement() {
                   }>
                   Options
                 </button>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => navigate("/manage-categories")}
-                className="h-10 px-5 bg-white rounded-full text-sm font-bold text-gray-800 hover:bg-white border border-gray-200 shadow-sm transition-colors whitespace-nowrap">
-                Manage categories
-              </button>
-            </div>
-
-            <div className="px-4 pb-4">
-              <div className="relative">
-                <FaSearch
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                  size={18}
-                />
-                <input
-                  type="text"
-                  placeholder="Search items"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-10 py-3 border border-gray-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-primary-orange/20 focus:border-primary-orange text-sm font-semibold text-gray-800 placeholder-gray-400"
-                />
-                {searchQuery?.trim()?.length > 0 && (
-                  <button
-                    type="button"
-                    aria-label="Clear search"
-                    onClick={() => setSearchQuery("")}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors">
-                    ✕
-                  </button>
-                )}
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("categories")}
+                  className={`flex-1 py-2.5 text-center font-bold rounded-xl transition-all ${
+                    activeTab === "categories"
+                      ? "text-white shadow-lg"
+                      : "bg-transparent text-gray-600 hover:bg-gray-100"
+                  }`}
+                  style={
+                    activeTab === "categories"
+                      ? {
+                          backgroundColor: "var(--color-primary)",
+                          boxShadow:
+                            "0 10px 25px -5px var(--color-primary-shadow)",
+                        }
+                      : {}
+                  }>
+                  Categories
+                </button>
               </div>
             </div>
+
+            {activeTab !== "categories" && (
+              <div className="px-4 pb-4">
+                <div className="relative">
+                  <FaSearch
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                    size={18}
+                  />
+                  <input
+                    type="text"
+                    placeholder="Search items"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-10 pr-10 py-3 border border-gray-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-primary-orange/20 focus:border-primary-orange text-sm font-semibold text-gray-800 placeholder-gray-400"
+                  />
+                  {searchQuery?.trim()?.length > 0 && (
+                    <button
+                      type="button"
+                      aria-label="Clear search"
+                      onClick={() => setSearchQuery("")}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors">
+                      ✕
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -772,7 +800,7 @@ function MenuManagement() {
               })
             )}
           </div>
-        ) : (
+        ) : activeTab === "options" ? (
           <div className="space-y-3">
             {optionTemplates.length === 0 ? (
               <Card className="py-12">
@@ -919,7 +947,11 @@ function MenuManagement() {
               })
             )}
           </div>
-        )}
+        ) : activeTab === "categories" ? (
+          <div className="bg-white">
+            <EditCategories />
+          </div>
+        ) : null}
       </div>
 
       {/* Unavailable Reason Modal */}

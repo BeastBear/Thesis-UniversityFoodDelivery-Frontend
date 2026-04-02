@@ -157,8 +157,7 @@ function EditCategories() {
   }
 
   return (
-    <div className="min-h-screen bg-white pb-28">
-      {/* Header */}
+    <div className="w-full">
       {/* Categories List */}
       <div className="max-w-7xl mx-auto px-4 py-6">
         {categories.length === 0 ? (
@@ -247,7 +246,7 @@ function EditCategories() {
       </div>
 
       {/* Add Category Button - Mobile Only */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 md:hidden">
+      <div className="mt-2 md:hidden px-4 pb-8">
         <button
           type="button"
           onClick={() => {
