@@ -13,6 +13,38 @@ import {
   FaClock,
 } from "react-icons/fa";
 
+const UNIVERSITY_DATA = {
+  "Faculty of Engineering": [
+    "Computer Engineering",
+    "Mechanical Engineering",
+    "Electrical Engineering",
+    "Civil Engineering",
+    "Chemical Engineering",
+  ],
+  "Faculty of Science": [
+    "Computer Science",
+    "Biology",
+    "Chemistry",
+    "Physics",
+    "Mathematics",
+  ],
+  "Faculty of Business": [
+    "Marketing",
+    "Finance",
+    "Accounting",
+    "Management",
+    "International Business",
+  ],
+  "Faculty of Arts": [
+    "English",
+    "History",
+    "Philosophy",
+    "Psychology",
+    "Sociology",
+  ],
+  "Faculty of Medicine": ["Medicine", "Nursing", "Pharmacy", "Dentistry"],
+};
+
 function DeliveryVerification() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -155,7 +187,11 @@ function DeliveryVerification() {
 
   const handleStudentChange = (e) => {
     const { name, value } = e.target;
-    setStudentForm((prev) => ({ ...prev, [name]: value }));
+    if (name === "faculty") {
+      setStudentForm((prev) => ({ ...prev, [name]: value, major: "" }));
+    } else {
+      setStudentForm((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   const uploadProfileImage = async (file) => {
@@ -583,28 +619,45 @@ function DeliveryVerification() {
                     <label className="text-sm font-medium text-gray-700">
                       Faculty
                     </label>
-                    <input
-                      type="text"
+                    <select
                       name="faculty"
                       value={studentForm.faculty}
                       onChange={handleStudentChange}
-                      className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Enter faculty"
-                    />
+                      className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                      <option value="">Select a faculty</option>
+                      {Object.keys(UNIVERSITY_DATA).map((faculty) => (
+                        <option key={faculty} value={faculty}>
+                          {faculty}
+                        </option>
+                      ))}
+                    </select>
                   </div>
 
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-gray-700">
                       Major
                     </label>
-                    <input
-                      type="text"
+                    <select
                       name="major"
                       value={studentForm.major}
                       onChange={handleStudentChange}
-                      className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Enter major"
-                    />
+                      disabled={!studentForm.faculty}
+                      className={`w-full px-3 py-2.5 border border-gray-300 rounded-lg text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                        !studentForm.faculty ? "bg-gray-50 opacity-60" : "bg-white"
+                      }`}>
+                      {!studentForm.faculty ? (
+                        <option value="">Select a faculty first</option>
+                      ) : (
+                        <>
+                          <option value="">Select a major</option>
+                          {UNIVERSITY_DATA[studentForm.faculty]?.map((major) => (
+                            <option key={major} value={major}>
+                              {major}
+                            </option>
+                          ))}
+                        </>
+                      )}
+                    </select>
                   </div>
                 </div>
 
