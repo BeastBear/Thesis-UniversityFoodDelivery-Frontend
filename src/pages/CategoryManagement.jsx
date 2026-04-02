@@ -17,7 +17,7 @@ import { ClipLoader } from "react-spinners";
 import PrimaryButton from "../components/ui/PrimaryButton";
 import { toast } from "react-toastify";
 
-function CategoryManagement() {
+function CategoryManagement({ embedded }) {
   const navigate = useNavigate();
   const { myShopData } = useSelector((state) => state.owner);
   const [categories, setCategories] = useState([]);
@@ -113,7 +113,7 @@ function CategoryManagement() {
   }
 
   return (
-    <div className="min-h-screen bg-white pb-24">
+    <div className={embedded ? "w-full" : "min-h-screen bg-white pb-24"}>
       {/* Header */}
       {/* Content */}
       <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
@@ -175,6 +175,40 @@ function CategoryManagement() {
                 </h3>
                 <p className="text-sm text-gray-500 leading-tight -mt-0.5">
                   Create option template
+                </p>
+              </div>
+            </div>
+            <IoIosArrowRoundBack
+              size={20}
+              className="text-gray-300 rotate-180"
+            />
+          </button>
+        </div>
+
+        {/* Add Category Section */}
+        <div className="mt-6">
+          <h2 className="text-sm font-extrabold text-gray-900 uppercase tracking-wider mb-3">
+            Add Category
+          </h2>
+          <button
+            type="button"
+            onClick={() => setShowAddModal(true)}
+            className="w-full bg-white border border-gray-100 rounded-3xl p-5 flex items-center justify-between hover:shadow-md transition-all"
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.borderColor =
+                "var(--color-primary-border)")
+            }
+            onMouseLeave={(e) => (e.currentTarget.style.borderColor = "")}>
+            <div className="flex items-center gap-3">
+              <div className="shrink-0 bg-white w-11 h-11 rounded-2xl border border-gray-100 flex items-center justify-center">
+                <FaPlus className="text-gray-600" size={20} />
+              </div>
+              <div className="flex flex-col text-left">
+                <h3 className="text-base font-extrabold text-gray-900 leading-tight">
+                  Add Category
+                </h3>
+                <p className="text-sm text-gray-500 leading-tight -mt-0.5">
+                  Create a new category
                 </p>
               </div>
             </div>

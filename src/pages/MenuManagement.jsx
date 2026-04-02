@@ -18,6 +18,7 @@ import EmptyState from "../components/ui/EmptyState";
 import PrimaryButton from "../components/ui/PrimaryButton";
 import { toast } from "react-toastify";
 import EditCategories from "./EditCategories";
+import CategoryManagement from "./CategoryManagement";
 
 function MenuManagement() {
   const navigate = useNavigate();
@@ -476,21 +477,21 @@ function MenuManagement() {
             </button>
             <button
               type="button"
-              onClick={() => setActiveTab("categories")}
+              onClick={() => setActiveTab("manage")}
               className={`flex-1 py-3 px-1 text-center font-bold text-[13px] sm:text-sm rounded-2xl transition-all ${
-                activeTab === "categories"
+                activeTab === "manage"
                   ? "text-white shadow-lg"
                   : "bg-white text-gray-600 hover:bg-gray-100"
               }`}
               style={
-                activeTab === "categories"
+                activeTab === "manage"
                   ? {
                       backgroundColor: "var(--color-primary)",
                       boxShadow: "0 10px 25px -5px var(--color-primary-shadow)",
                     }
                   : {}
               }>
-              Categories
+              Manage
             </button>
           </div>
 
@@ -569,14 +570,14 @@ function MenuManagement() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setActiveTab("categories")}
+                  onClick={() => setActiveTab("manage")}
                   className={`flex-1 py-2.5 text-center font-bold rounded-xl transition-all ${
-                    activeTab === "categories"
+                    activeTab === "manage"
                       ? "text-white shadow-lg"
                       : "bg-transparent text-gray-600 hover:bg-gray-100"
                   }`}
                   style={
-                    activeTab === "categories"
+                    activeTab === "manage"
                       ? {
                           backgroundColor: "var(--color-primary)",
                           boxShadow:
@@ -584,12 +585,12 @@ function MenuManagement() {
                         }
                       : {}
                   }>
-                  Categories
+                  Manage
                 </button>
               </div>
             </div>
 
-            {activeTab !== "categories" && (
+            {activeTab !== "manage" && (
               <div className="px-4 pb-4">
                 <div className="relative">
                   <FaSearch
@@ -947,9 +948,9 @@ function MenuManagement() {
               })
             )}
           </div>
-        ) : activeTab === "categories" ? (
+        ) : activeTab === "manage" ? (
           <div className="bg-white">
-            <EditCategories />
+            <CategoryManagement embedded={true} />
           </div>
         ) : null}
       </div>
