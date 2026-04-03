@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from "react";
 
 import { useSelector, useDispatch } from "react-redux";
 import axios from "axios";
-import { serverUrl } from "../App";
+import { serverUrl } from "../config";
 import { useNavigate, useLocation } from "react-router-dom";
 import { FaWallet, FaFileInvoiceDollar } from "react-icons/fa";
 import { RiMoneyDollarCircleLine } from "react-icons/ri";
@@ -68,81 +68,7 @@ function DeliveryBoyFinanceContent() {
     return null;
   }, [userData]);
 
-  useEffect(() => {
-    if (!showTopUpModal) return;
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = previousOverflow;
-    };
-  }, [showTopUpModal]);
-
-  // Reset processing state when modal opens/closes
-  useEffect(() => {
-    if (!showTopUpModal) {
-      setIsProcessing(false);
-      setTopUpAmount("");
-    }
-  }, [showTopUpModal]);
-
-  // Safety timeout to reset processing state if stuck
-  useEffect(() => {
-    if (isProcessing) {
-      const timeout = setTimeout(() => {
-        setIsProcessing(false);
-      }, 30000); // 30 second timeout
-      return () => clearTimeout(timeout);
-    }
-  }, [isProcessing]);
-
-  // Handle PromptPay Polling
-  useEffect(() => {
-    let intervalId;
-    if (pollingClientSecret && showTopUpModal) {
-      intervalId = setInterval(async () => {
-        try {
-          const stripe = await stripePromise;
-          const { paymentIntent } = await stripe.retrievePaymentIntent(pollingClientSecret);
-          if (paymentIntent && paymentIntent.status === "succeeded") {
-            clearInterval(intervalId);
-            setPollingClientSecret(null);
-            setPromptPayQrUrl("");
-            setShowTopUpModal(false);
-            setTopUpAmount("");
-            toast.success("Top up successful!");
-            fetchFinancialData();
-            
-            // Cleanup URL params if any
-            if (window.location.search) {
-               navigate("/delivery-boy-finance", { replace: true });
-            }
-          }
-        } catch (error) {
-          console.error("Polling error:", error);
-        }
-      }, 3000);
-    }
-    return () => {
-      if (intervalId) clearInterval(intervalId);
-    };
-  }, [pollingClientSecret, showTopUpModal, fetchFinancialData, navigate]);
-
-  // Handle Escape key to close modal
-  useEffect(() => {
-    const handleEscape = (e) => {
-      if (e.key === "Escape" && showTopUpModal) {
-        setShowTopUpModal(false);
-        setTopUpAmount("");
-        setIsProcessing(false);
-        setPromptPayQrUrl("");
-        setPollingClientSecret(null);
-      }
-    };
-    window.addEventListener("keydown", handleEscape);
-    return () => window.removeEventListener("keydown", handleEscape);
-  }, [showTopUpModal]);
-
-  // Fetch financial data function (extracted to be reusable)
+  // ─── FETCH FINANCIAL DATA declared before useEffects that reference it (prevents TDZ crash) ───
   const fetchFinancialData = useCallback(async () => {
     if (!userData?._id) return;
 
@@ -334,6 +260,79 @@ function DeliveryBoyFinanceContent() {
       socket.off("job-credit-updated", handleJobCreditUpdate);
     };
   }, [socket, fetchFinancialData]);
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (!showTopUpModal) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [showTopUpModal]);
+
+  // Reset processing state when modal closes
+  useEffect(() => {
+    if (!showTopUpModal) {
+      setIsProcessing(false);
+      setTopUpAmount("");
+    }
+  }, [showTopUpModal]);
+
+  // Safety timeout to reset processing if stuck
+  useEffect(() => {
+    if (isProcessing) {
+      const timeout = setTimeout(() => {
+        setIsProcessing(false);
+      }, 30000);
+      return () => clearTimeout(timeout);
+    }
+  }, [isProcessing]);
+
+  // PromptPay polling — polls Stripe every 3s until payment succeeds
+  useEffect(() => {
+    let intervalId;
+    if (pollingClientSecret && showTopUpModal) {
+      intervalId = setInterval(async () => {
+        try {
+          const stripeInstance = await stripePromise;
+          const { paymentIntent } = await stripeInstance.retrievePaymentIntent(pollingClientSecret);
+          if (paymentIntent && paymentIntent.status === "succeeded") {
+            clearInterval(intervalId);
+            setPollingClientSecret(null);
+            setPromptPayQrUrl("");
+            setShowTopUpModal(false);
+            setTopUpAmount("");
+            toast.success("Top up successful!");
+            fetchFinancialData();
+            if (window.location.search) {
+              navigate("/delivery-boy-finance", { replace: true });
+            }
+          }
+        } catch (error) {
+          console.error("Polling error:", error);
+        }
+      }, 3000);
+    }
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [pollingClientSecret, showTopUpModal, fetchFinancialData, navigate]);
+
+  // Close modal on Escape key
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === "Escape" && showTopUpModal) {
+        setShowTopUpModal(false);
+        setTopUpAmount("");
+        setIsProcessing(false);
+        setPromptPayQrUrl("");
+        setPollingClientSecret(null);
+      }
+    };
+    window.addEventListener("keydown", handleEscape);
+    return () => window.removeEventListener("keydown", handleEscape);
+  }, [showTopUpModal]);
 
   // Handle Stripe Checkout return URLs
   useEffect(() => {
@@ -1124,9 +1123,9 @@ function DeliveryBoyFinanceContent() {
                     </div>
                   </div>
                 </div>
+                </div>
+              </div>
             </div>
-          </div>
-          </div>
           </div>
         )}
       </div>
@@ -1134,4 +1133,10 @@ function DeliveryBoyFinanceContent() {
   );
 }
 
-export default DeliveryBoyFinance
+export default function DeliveryBoyFinance() {
+  return (
+    <Elements stripe={stripePromise}>
+      <DeliveryBoyFinanceContent />
+    </Elements>
+  );
+}
