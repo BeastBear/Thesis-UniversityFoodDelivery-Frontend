@@ -474,7 +474,9 @@ function UserDashboard() {
           </div>
         ) : (allShops || shopsInMyCity)?.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {(allShops || shopsInMyCity).map((shop) => {
+            {(allShops || shopsInMyCity)
+              .filter((shop) => shop.isOpen !== false)
+              .map((shop) => {
               // Distance from restaurant to user
               // Priority: Default Address -> First Saved Address -> GPS
               const savedAddresses = userData?.savedAddresses || [];

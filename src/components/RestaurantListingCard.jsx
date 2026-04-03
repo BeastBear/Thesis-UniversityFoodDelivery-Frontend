@@ -22,19 +22,27 @@ function RestaurantListingCard({
 
   return (
     <div
-      className="w-full bg-white rounded-3xl shadow-lg border-none overflow-hidden hover:shadow-xl transition-all cursor-pointer group p-0"
+      className="w-full bg-white rounded-3xl shadow-lg border-none overflow-hidden hover:shadow-xl transition-all cursor-pointer group p-0 relative"
       onClick={onClick}>
       {/* Image Section - Top */}
       <div className="relative w-full aspect-4/3 overflow-hidden bg-gray-100">
         <img
           src={data.image}
           alt={data.name}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ${!data.isOpen ? "grayscale-[0.5] opacity-80" : ""}`}
           onError={(e) => {
             e.target.style.display = "none";
           }}
         />
         <div className="absolute inset-x-0 bottom-0 h-20 bg-linear-to-t from-black/35 to-transparent" />
+
+        {data.isOpen === false && (
+          <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
+            <span className="bg-red-500 text-white px-4 py-2 rounded-full font-bold text-sm shadow-xl rotate-[-5deg]">
+              CLOSED NOW
+            </span>
+          </div>
+        )}
 
         {data.isVerified && (
           <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-2.5 py-1.5 rounded-xl shadow-sm flex items-center gap-1.5 text-xs font-bold text-gray-800">
