@@ -59,7 +59,12 @@ function DeliveryVerification() {
   const [profileForm, setProfileForm] = useState(() => {
     const saved = localStorage.getItem("delivererProfileForm");
     if (saved) return JSON.parse(saved);
-    return { idNumber: "" };
+    return {
+      fullName: "",
+      email: "",
+      mobile: "",
+      idNumber: "",
+    };
   });
 
   const [studentForm, setStudentForm] = useState(() => {
@@ -126,6 +131,17 @@ function DeliveryVerification() {
     verificationStatus?.studentInfo?.faculty,
     verificationStatus?.studentInfo?.major,
   ]);
+
+  useEffect(() => {
+    if (!localStorage.getItem("delivererProfileForm")) {
+      setProfileForm((prev) => ({
+        ...prev,
+        fullName: userData?.fullName || prev.fullName,
+        email: userData?.email || prev.email,
+        mobile: userData?.mobile || prev.mobile,
+      }));
+    }
+  }, [userData]);
 
   useEffect(() => {
     if (!localStorage.getItem("delivererBankForm")) {
@@ -316,6 +332,9 @@ function DeliveryVerification() {
     formData.append("studentIdNumber", studentForm.studentIdNumber);
     formData.append("faculty", studentForm.faculty);
     formData.append("major", studentForm.major);
+    formData.append("fullName", profileForm.fullName);
+    formData.append("email", profileForm.email);
+    formData.append("mobile", profileForm.mobile);
 
     try {
       await axios.post(`${serverUrl}/api/delivery/verify`, formData, {
@@ -326,6 +345,17 @@ function DeliveryVerification() {
         type: "success",
         text: "Documents submitted successfully",
       });
+
+      // Update local Redux state so other components know it's pending
+      if (userData) {
+        dispatch(
+          setUserData({
+            ...userData,
+            deliveryVerificationStatus: "pending",
+          }),
+        );
+      }
+
       fetchVerificationStatus();
       setStudentCard(null);
       localStorage.removeItem("delivererProfileForm");
@@ -552,29 +582,53 @@ function DeliveryVerification() {
                 </div>
 
                 <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="rounded-2xl bg-slate-50 border border-slate-100 p-4">
-                    <div className="text-xs font-black tracking-[0.14em] text-slate-500">
+                  <div className="rounded-2xl bg-slate-50 border border-slate-100 p-4 flex flex-col justify-center">
+                    <label
+                      htmlFor="fullName"
+                      className="text-xs font-black tracking-[0.14em] text-slate-500 cursor-pointer">
                       FULL NAME
-                    </div>
-                    <div className="mt-1 text-sm font-extrabold text-slate-900">
-                      {userData?.fullName || "—"}
-                    </div>
+                    </label>
+                    <input
+                      type="text"
+                      id="fullName"
+                      name="fullName"
+                      value={profileForm.fullName}
+                      onChange={handleProfileChange}
+                      className="mt-1 w-full bg-transparent text-sm font-extrabold text-slate-900 focus:outline-none placeholder:text-slate-400 placeholder:font-medium"
+                      placeholder="Enter full name"
+                    />
                   </div>
-                  <div className="rounded-2xl bg-slate-50 border border-slate-100 p-4">
-                    <div className="text-xs font-black tracking-[0.14em] text-slate-500">
+                  <div className="rounded-2xl bg-slate-50 border border-slate-100 p-4 flex flex-col justify-center">
+                    <label
+                      htmlFor="email"
+                      className="text-xs font-black tracking-[0.14em] text-slate-500 cursor-pointer">
                       EMAIL
-                    </div>
-                    <div className="mt-1 text-sm font-extrabold text-slate-900">
-                      {userData?.email || "—"}
-                    </div>
+                    </label>
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
+                      value={profileForm.email}
+                      onChange={handleProfileChange}
+                      className="mt-1 w-full bg-transparent text-sm font-extrabold text-slate-900 focus:outline-none placeholder:text-slate-400 placeholder:font-medium"
+                      placeholder="Enter email address"
+                    />
                   </div>
-                  <div className="rounded-2xl bg-slate-50 border border-slate-100 p-4">
-                    <div className="text-xs font-black tracking-[0.14em] text-slate-500">
+                  <div className="rounded-2xl bg-slate-50 border border-slate-100 p-4 flex flex-col justify-center">
+                    <label
+                      htmlFor="mobile"
+                      className="text-xs font-black tracking-[0.14em] text-slate-500 cursor-pointer">
                       PHONE NUMBER
-                    </div>
-                    <div className="mt-1 text-sm font-extrabold text-slate-900">
-                      {userData?.mobile || "—"}
-                    </div>
+                    </label>
+                    <input
+                      type="text"
+                      id="mobile"
+                      name="mobile"
+                      value={profileForm.mobile}
+                      onChange={handleProfileChange}
+                      className="mt-1 w-full bg-transparent text-sm font-extrabold text-slate-900 focus:outline-none placeholder:text-slate-400 placeholder:font-medium"
+                      placeholder="Enter phone number"
+                    />
                   </div>
                   <div className="rounded-2xl bg-slate-50 border border-slate-100 p-4 flex flex-col justify-center">
                     <label

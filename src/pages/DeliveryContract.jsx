@@ -14,67 +14,87 @@ function DeliveryContract() {
   const [loading, setLoading] = useState(true);
 
   const studentIdNumber = useMemo(() => {
+    if (!userData) return "—";
     return (
-      userData?.studentIdNumber ||
-      userData?.studentIDNumber ||
-      userData?.studentId ||
-      userData?.studentID ||
-      userData?.studentNumber ||
-      userData?.studentNo ||
+      userData.studentIdNumber ||
+      userData.studentIDNumber ||
+      userData.studentId ||
+      userData.studentID ||
+      userData.studentNumber ||
+      userData.studentNo ||
       "—"
     );
-  }, [
-    userData?.studentIdNumber,
-    userData?.studentIDNumber,
-    userData?.studentId,
-    userData?.studentID,
-    userData?.studentNumber,
-    userData?.studentNo,
-  ]);
+  }, [userData]);
 
   useEffect(() => {
+    let isMounted = true;
+    
     const fetchStatus = async () => {
+      if (!userData?._id) return;
+      
       setLoading(true);
       try {
-        const res = await axios.get(`${serverUrl}/api/delivery/status`, {
+        const url = `${serverUrl}/api/delivery/status`;
+        const res = await axios.get(url, {
           withCredentials: true,
         });
-        setDeliveryVerification(res?.data || null);
+        
+        if (isMounted) {
+          setDeliveryVerification(res?.data || null);
+        }
       } catch (e) {
-        setDeliveryVerification(null);
+        console.error("Failed to fetch delivery status:", e);
+        if (isMounted) {
+          setDeliveryVerification(null);
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
     fetchStatus();
-  }, []);
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [userData?._id]);
 
-  const verificationStatus = deliveryVerification?.status || "unverified";
-  const verificationLabel =
-    verificationStatus === "pending"
-      ? "Pending"
-      : verificationStatus === "verified"
-        ? "Verified"
-        : verificationStatus === "rejected"
-          ? "Rejected"
-          : "Unverified";
+  const verificationStatus = useMemo(() => 
+    deliveryVerification?.status || "unverified"
+  , [deliveryVerification]);
 
-  const verificationClasses =
-    verificationStatus === "verified"
-      ? "bg-green-50 text-green-700 border-green-200"
-      : verificationStatus === "pending"
-        ? "bg-amber-50 text-amber-700 border-amber-200"
-        : verificationStatus === "rejected"
-          ? "bg-red-50 text-red-700 border-red-200"
-          : "bg-white text-gray-700 border-gray-200";
+  const verificationLabel = useMemo(() => {
+    switch (verificationStatus) {
+      case "pending": return "Pending";
+      case "verified": return "Verified";
+      case "rejected": return "Rejected";
+      default: return "Unverified";
+    }
+  }, [verificationStatus]);
 
-  const submittedAtLabel = deliveryVerification?.submittedAt
-    ? new Date(deliveryVerification.submittedAt).toLocaleString()
-    : "—";
-  const verifiedAtLabel = deliveryVerification?.verifiedAt
-    ? new Date(deliveryVerification.verifiedAt).toLocaleString()
-    : "—";
+  const verificationClasses = useMemo(() => {
+    switch (verificationStatus) {
+      case "verified": return "bg-green-50 text-green-700 border-green-200";
+      case "pending": return "bg-amber-50 text-amber-700 border-amber-200";
+      case "rejected": return "bg-red-50 text-red-700 border-red-200";
+      default: return "bg-white text-gray-700 border-gray-200";
+    }
+  }, [verificationStatus]);
+
+  const submittedAtLabel = useMemo(() => 
+    deliveryVerification?.submittedAt
+      ? new Date(deliveryVerification.submittedAt).toLocaleString()
+      : "—"
+  , [deliveryVerification?.submittedAt]);
+
+  const verifiedAtLabel = useMemo(() => 
+    deliveryVerification?.verifiedAt
+      ? new Date(deliveryVerification.verifiedAt).toLocaleString()
+      : "—"
+  , [deliveryVerification?.verifiedAt]);
+
 
   return (
     <DeliveryLayout>
