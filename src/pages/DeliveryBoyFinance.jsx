@@ -108,6 +108,10 @@ function DeliveryBoyFinanceContent() {
                 userData._id?.toString());
 
           if (isAssigned && shopOrder.status === "delivered") {
+            const deliveredDate = shopOrder.deliveredAt 
+              ? new Date(shopOrder.deliveredAt)
+              : new Date(shopOrder.updatedAt || order.updatedAt);
+            
             // Add delivery fee only once per order
             if (!processedOrderIds.has(order._id.toString())) {
               // Calculate total earnings

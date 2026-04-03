@@ -112,13 +112,10 @@ function IncomeSummary() {
         orders.forEach((order) => {
           if (!order.shopOrders) return;
 
-          // Filter: Only include orders with online payment methods (exclude COD)
-          const paymentMethod = String(order.paymentMethod || "").toLowerCase();
-          const isOnlinePayment = ["online", "promptpay", "card"].includes(
-            paymentMethod,
-          );
-
-          if (!isOnlinePayment) return; // Skip COD orders
+          // We no longer skip COD orders for Net Income display as they represent real work done
+          // const isOnlinePayment = ["online", "promptpay", "card"].includes(
+          //   paymentMethod,
+          // );
 
           order.shopOrders.forEach((shopOrder) => {
             // Handle assignedDeliveryBoy as either a populated object or a plain ID string
@@ -128,17 +125,19 @@ function IncomeSummary() {
                 ? assigned._id?.toString()
                 : assigned?.toString();
 
-            if (
-              assignedId === userData._id?.toString() &&
-              shopOrder.status === "delivered" &&
-              shopOrder.deliveredAt
-            ) {
-              const deliveredDate = new Date(shopOrder.deliveredAt);
               if (
-                deliveredDate >= dateRange.startDate &&
-                deliveredDate <= dateRange.endDate
+                assignedId === userData._id?.toString() &&
+                shopOrder.status === "delivered"
               ) {
-                completedCount++;
+                const deliveredDate = shopOrder.deliveredAt 
+                  ? new Date(shopOrder.deliveredAt)
+                  : new Date(shopOrder.updatedAt || order.updatedAt);
+                
+                if (
+                  deliveredDate >= dateRange.startDate &&
+                  deliveredDate <= dateRange.endDate
+                ) {
+                  completedCount++;
                 // Add delivery fee only once per order
                 if (!processedOrderIds.has(order._id.toString())) {
                   totalIncome += Number(order.deliveryFee) || 0;
@@ -200,15 +199,15 @@ function IncomeSummary() {
           orders.forEach((order) => {
             if (!order.shopOrders) return;
 
-            // Filter: Only include orders with online payment methods (exclude COD)
-            const paymentMethod = String(
-              order.paymentMethod || "",
-            ).toLowerCase();
-            const isOnlinePayment = ["online", "promptpay", "card"].includes(
-              paymentMethod,
-            );
+            // We no longer skip COD orders for Net Income display
+            // const paymentMethod = String(
+            //   order.paymentMethod || "",
+            // ).toLowerCase();
+            // const isOnlinePayment = ["online", "promptpay", "card"].includes(
+            //   paymentMethod,
+            // );
 
-            if (!isOnlinePayment) return; // Skip COD orders
+            // if (!isOnlinePayment) return; // Skip COD orders
 
             order.shopOrders.forEach((shopOrder) => {
               // Handle assignedDeliveryBoy as either populated object or plain ID
@@ -220,10 +219,12 @@ function IncomeSummary() {
 
               if (
                 assignedId === userData._id?.toString() &&
-                shopOrder.status === "delivered" &&
-                shopOrder.deliveredAt
+                shopOrder.status === "delivered"
               ) {
-                const deliveredDate = new Date(shopOrder.deliveredAt);
+                const deliveredDate = shopOrder.deliveredAt 
+                  ? new Date(shopOrder.deliveredAt)
+                  : new Date(shopOrder.updatedAt || order.updatedAt);
+
                 if (
                   deliveredDate >= previousStartDate &&
                   deliveredDate <= previousEndDate

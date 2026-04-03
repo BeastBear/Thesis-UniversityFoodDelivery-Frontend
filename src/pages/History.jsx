@@ -219,8 +219,8 @@ function History() {
 
         if (
           orderStatus === "delivered" &&
-          order.deliveryFee &&
-          isOnlinePayment
+          order.deliveryFee
+          // && isOnlinePayment // We now include all payment methods in history earnings
         ) {
           totalEarnings += Number(order.deliveryFee) || 0;
         }
