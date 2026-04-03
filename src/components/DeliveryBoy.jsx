@@ -352,6 +352,73 @@ function DeliveryBoy() {
     }
   }, [triggerRefresh]);
 
+  // Fetch Current Active Order
+  const fetchCurrentOrder = useCallback(async () => {
+    if (!userData?._id) return;
+    setPageLoading(true);
+    try {
+      const res = await axios.get(`${serverUrl}/api/order/get-current-order`, {
+        withCredentials: true,
+      });
+      if (res.data) {
+        const order = res.data;
+        const shopOrderStatus = order.shopOrder?.status?.toLowerCase();
+
+        // Check if order is cancelled
+        if (shopOrderStatus === "cancelled" || shopOrderStatus === "canceled") {
+          setCurrentOrder(null);
+          setHasArrivedAtRestaurant(false);
+          setShowTravelToCustomer(false);
+          setShowTravelToRestaurant(false);
+          try {
+            localStorage.removeItem(`deliveryStage_${order._id}`);
+          } catch (e) {
+            // ignore
+          }
+          return;
+        }
+
+        setCurrentOrder(order);
+
+        // Restore stage from local storage or infer
+        const orderId = order._id.toString();
+        const savedStage = localStorage.getItem(`deliveryStage_${orderId}`);
+
+        if (savedStage === "picked_up") {
+          setHasArrivedAtRestaurant(true);
+          setShowTravelToCustomer(true);
+          setShowTravelToRestaurant(false);
+        } else if (savedStage === "restaurant") {
+          setHasArrivedAtRestaurant(true);
+          setShowTravelToRestaurant(false); // At restaurant
+          setShowTravelToCustomer(false);
+        } else if (
+          order.shopOrder?.status === "prepared" ||
+          order.shopOrder?.status === "being_cooked" ||
+          order.shopOrder?.status === "accepted"
+        ) {
+          // Default to traveling to restaurant
+          setShowTravelToRestaurant(true);
+          setHasArrivedAtRestaurant(false);
+          setShowTravelToCustomer(false);
+        } else if (
+          order.shopOrder?.status === "picked_up" ||
+          order.shopOrder?.status === "out_for_delivery"
+        ) {
+          setHasArrivedAtRestaurant(true);
+          setShowTravelToCustomer(true);
+          setShowTravelToRestaurant(false);
+        }
+      } else {
+        setCurrentOrder(null);
+      }
+    } catch (err) {
+    } finally {
+      setPageLoading(false);
+    }
+  }, [userData?._id]);
+
+
   const handleJobCancelled = (data) => {
     const activeId = currentOrder?._id ? String(currentOrder._id) : "";
     const incomingId = data?.orderId ? String(data.orderId) : "";
@@ -475,72 +542,6 @@ function DeliveryBoy() {
     }, 1000);
     return () => clearInterval(timer);
   }, []);
-
-  // Fetch Current Active Order
-  const fetchCurrentOrder = useCallback(async () => {
-    if (!userData?._id) return;
-    setPageLoading(true);
-    try {
-      const res = await axios.get(`${serverUrl}/api/order/get-current-order`, {
-        withCredentials: true,
-      });
-      if (res.data) {
-        const order = res.data;
-        const shopOrderStatus = order.shopOrder?.status?.toLowerCase();
-
-        // Check if order is cancelled
-        if (shopOrderStatus === "cancelled" || shopOrderStatus === "canceled") {
-          setCurrentOrder(null);
-          setHasArrivedAtRestaurant(false);
-          setShowTravelToCustomer(false);
-          setShowTravelToRestaurant(false);
-          try {
-            localStorage.removeItem(`deliveryStage_${order._id}`);
-          } catch (e) {
-            // ignore
-          }
-          return;
-        }
-
-        setCurrentOrder(order);
-
-        // Restore stage from local storage or infer
-        const orderId = order._id.toString();
-        const savedStage = localStorage.getItem(`deliveryStage_${orderId}`);
-
-        if (savedStage === "picked_up") {
-          setHasArrivedAtRestaurant(true);
-          setShowTravelToCustomer(true);
-          setShowTravelToRestaurant(false);
-        } else if (savedStage === "restaurant") {
-          setHasArrivedAtRestaurant(true);
-          setShowTravelToRestaurant(false); // At restaurant
-          setShowTravelToCustomer(false);
-        } else if (
-          order.shopOrder?.status === "prepared" ||
-          order.shopOrder?.status === "being_cooked" ||
-          order.shopOrder?.status === "accepted"
-        ) {
-          // Default to traveling to restaurant
-          setShowTravelToRestaurant(true);
-          setHasArrivedAtRestaurant(false);
-          setShowTravelToCustomer(false);
-        } else if (
-          order.shopOrder?.status === "picked_up" ||
-          order.shopOrder?.status === "out_for_delivery"
-        ) {
-          setHasArrivedAtRestaurant(true);
-          setShowTravelToCustomer(true);
-          setShowTravelToRestaurant(false);
-        }
-      } else {
-        setCurrentOrder(null);
-      }
-    } catch (err) {
-    } finally {
-      setPageLoading(false);
-    }
-  }, [userData?._id]);
 
   useEffect(() => {
     fetchCurrentOrder();

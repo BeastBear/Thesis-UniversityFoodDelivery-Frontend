@@ -15,7 +15,7 @@ import {
   useElements,
 } from '@stripe/react-stripe-js';
 
-const SetupForm = ({ clientSecret }) => {
+function SetupForm({ clientSecret }) {
   const stripe = useStripe();
   const elements = useElements();
   const navigate = useNavigate();
@@ -156,9 +156,9 @@ const SetupForm = ({ clientSecret }) => {
       </div>
     </form>
   );
-};
+}
 
-function AddCardPage() {
+export default function AddCardPage() {
   const [clientSecret, setClientSecret] = useState("");
 
   useEffect(() => {
@@ -193,4 +193,3 @@ function AddCardPage() {
   );
 }
 
-export default AddCardPage;

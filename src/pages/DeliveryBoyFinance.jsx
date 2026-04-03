@@ -14,25 +14,26 @@ import { getStripePromise } from "../utils/stripe.js";
 import { Elements, CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import { FaCcVisa, FaCcMastercard, FaCreditCard, FaQrcode } from "react-icons/fa";
 
-const CARD_ELEMENT_OPTIONS = {
-  style: {
-    base: {
-      color: "#32325d",
-      fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
-      fontSmoothing: "antialiased",
-      fontSize: "16px",
-      "::placeholder": {
-        color: "#aab7c4",
-      },
-    },
-    invalid: {
-      color: "#fa755a",
-      iconColor: "#fa755a",
-    },
-  },
-};
 
 function DeliveryBoyFinanceContent() {
+  const CARD_ELEMENT_OPTIONS = {
+    style: {
+      base: {
+        color: "#32325d",
+        fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
+        fontSmoothing: "antialiased",
+        fontSize: "16px",
+        "::placeholder": {
+          color: "#aab7c4",
+        },
+      },
+      invalid: {
+        color: "#fa755a",
+        iconColor: "#fa755a",
+      },
+    },
+  };
+
   const stripe = useStripe();
   const elements = useElements();
   const { userData, socket } = useSelector((state) => state.user);
