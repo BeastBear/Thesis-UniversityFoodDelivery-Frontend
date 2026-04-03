@@ -392,8 +392,12 @@ function OrderDetail() {
               ) : (
                 <button
                   onClick={() => {
-                    if (shopOrder.shop?.shopNumber) {
-                      window.location.href = `tel:${shopOrder.shop.shopNumber}`;
+                    const ownerPhone = shopOrder.shop?.owner?.mobile || shopOrder.shop?.owner?.phone || shopOrder.shop?.owner?.phoneNumber;
+                    const shopPhone = shopOrder.shop?.shopNumber;
+                    const callTarget = ownerPhone || shopPhone;
+
+                    if (callTarget) {
+                      window.location.href = `tel:${callTarget}`;
                     } else {
                       toast.error("Restaurant phone number not available");
                     }
