@@ -392,7 +392,13 @@ function OrderDetail() {
               ) : (
                 <button
                   onClick={() => {
-                    const ownerPhone = shopOrder.shop?.owner?.mobile || shopOrder.shop?.owner?.phone || shopOrder.shop?.owner?.phoneNumber;
+                    const ownerPhone = 
+                      shopOrder.owner?.mobile || 
+                      shopOrder.owner?.phone || 
+                      shopOrder.owner?.phoneNumber ||
+                      shopOrder.shop?.owner?.mobile || 
+                      shopOrder.shop?.owner?.phone || 
+                      shopOrder.shop?.owner?.phoneNumber;
                     const shopPhone = shopOrder.shop?.shopNumber;
                     const callTarget = ownerPhone || shopPhone;
 
