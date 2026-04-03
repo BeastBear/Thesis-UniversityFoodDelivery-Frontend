@@ -108,11 +108,6 @@ function DeliveryBoyFinanceContent() {
 
       orders.forEach((order) => {
         if (!order.shopOrders) return;
-        const paymentMethod = String(order.paymentMethod || "").toLowerCase();
-        const isOnlinePayment = ["online", "promptpay", "card"].includes(
-          paymentMethod,
-        );
-        if (!isOnlinePayment) return;
 
         order.shopOrders.forEach((shopOrder) => {
           const isAssigned =
@@ -144,7 +139,6 @@ function DeliveryBoyFinanceContent() {
       let totalWalletWithdrawals = 0;
       let pendingWalletWithdrawals = 0;
       let onHoldAmount = 0;
-      let codCreditsToExclude = 0;
 
       if (userRes.data?.payouts && Array.isArray(userRes.data.payouts)) {
         userRes.data.payouts.forEach((payout) => {
@@ -155,15 +149,8 @@ function DeliveryBoyFinanceContent() {
 
           if (source === "wallet") {
             if (payoutType === "automatic" && payout.orderId) {
-              const relatedOrder = orders.find(
-                (o) => o._id?.toString() === payout.orderId?.toString(),
-              );
-              if (
-                relatedOrder &&
-                String(relatedOrder.paymentMethod || "").toLowerCase() === "cod"
-              ) {
-                codCreditsToExclude += payoutAmountVal;
-              }
+              // Automatic payouts represent earnings (including COD delivery fees now)
+              // We don't exclude them as they are legitimate earnings
             }
 
             if (payoutType === "manual") {
@@ -180,7 +167,7 @@ function DeliveryBoyFinanceContent() {
         });
       }
 
-      const adjustedEarnings = Math.max(0, totalEarnings - codCreditsToExclude);
+      const adjustedEarnings = Math.max(0, totalEarnings);
       const netWalletBalance = Math.max(
         0,
         adjustedEarnings - totalWalletWithdrawals,
@@ -213,7 +200,14 @@ function DeliveryBoyFinanceContent() {
     if (!socket) return;
     const handleUpdate = () => fetchFinancialData();
     socket.on("job-credit-updated", handleUpdate);
-    return () => socket.off("job-credit-updated", handleUpdate);
+    socket.on("update-status", handleUpdate);
+    socket.on("order-delivered", handleUpdate);
+
+    return () => {
+      socket.off("job-credit-updated", handleUpdate);
+      socket.off("update-status", handleUpdate);
+      socket.off("order-delivered", handleUpdate);
+    };
   }, [socket, fetchFinancialData]);
 
   useEffect(() => {
