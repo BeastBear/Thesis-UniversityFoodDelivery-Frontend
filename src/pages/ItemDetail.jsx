@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import { addToCart } from "../redux/userSlice";
 
-import { serverUrl } from "../App";
+import { serverUrl } from "../config";
 import {
   FaMinus,
   FaPlus,

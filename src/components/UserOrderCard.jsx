@@ -8,7 +8,7 @@ import {
   MdClose,
 } from "react-icons/md";
 import axios from "axios";
-import { serverUrl } from "../App";
+import { serverUrl } from "../config";
 import { toast } from "react-toastify";
 
 function UserOrderCard({ data }) {

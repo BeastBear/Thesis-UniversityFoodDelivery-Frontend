@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import axios from "axios";
-import { serverUrl } from "../App";
+import { serverUrl } from "../config";
 import { FaFileContract } from "react-icons/fa";
 import DeliveryLayout from "../layouts/DeliveryLayout";
 import DeliveryPageHero from "../components/Delivery/DeliveryPageHero";

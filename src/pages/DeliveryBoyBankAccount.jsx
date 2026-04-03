@@ -3,7 +3,7 @@ import { FaTimes, FaCheck } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import axios from "axios";
-import { serverUrl } from "../App";
+import { serverUrl } from "../config";
 import { setUserData } from "../redux/userSlice";
 import DeliveryLayout from "../layouts/DeliveryLayout";
 import DeliveryPageHero from "../components/Delivery/DeliveryPageHero";

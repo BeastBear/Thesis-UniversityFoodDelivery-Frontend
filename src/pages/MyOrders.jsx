@@ -24,7 +24,7 @@ import {
   updateOrderStatus,
 } from "../redux/userSlice";
 import axios from "axios";
-import { serverUrl } from "../App";
+import { serverUrl } from "../config";
 import { io } from "socket.io-client"; // Added io import
 import { useHeaderTitle } from "../context/UIContext.jsx";
 

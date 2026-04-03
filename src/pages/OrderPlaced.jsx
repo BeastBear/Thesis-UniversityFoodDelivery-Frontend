@@ -4,7 +4,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { addMyOrder, clearCart } from "../redux/userSlice";
 import axios from "axios";
-import { serverUrl } from "../App";
+import { serverUrl } from "../config";
 
 function OrderPlaced() {
   const navigate = useNavigate();

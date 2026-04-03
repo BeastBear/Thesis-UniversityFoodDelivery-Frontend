@@ -10,7 +10,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { setUserData } from "../redux/userSlice";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { serverUrl } from "../App";
+import { serverUrl } from "../config";
 import TaskCard from "./Delivery/TaskCard";
 import ActiveOrderPanel from "./Delivery/ActiveOrderPanel";
 import DeliveryMap from "./Delivery/DeliveryMap";

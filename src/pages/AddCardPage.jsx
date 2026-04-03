@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { FaInfoCircle } from "react-icons/fa";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
-import { serverUrl } from "../App";
+import { serverUrl } from "../config";
 import { setUserData } from "../redux/userSlice";
 import { toast } from "react-toastify";
 import { loadStripe } from '@stripe/stripe-js';

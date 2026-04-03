@@ -15,7 +15,7 @@ import {
 import { MdDeliveryDining, MdAttachMoney } from "react-icons/md";
 import { useSelector, useDispatch } from "react-redux";
 import axios from "axios";
-import { serverUrl } from "../App";
+import { serverUrl } from "../config";
 import { setUserData } from "../redux/userSlice";
 import { toast } from "react-toastify";
 import Card from "../components/ui/Card";

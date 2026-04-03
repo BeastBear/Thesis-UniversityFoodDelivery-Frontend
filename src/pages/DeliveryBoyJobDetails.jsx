@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import axios from "axios";
-import { serverUrl } from "../App";
+import { serverUrl } from "../config";
 import { FaHome, FaUtensils, FaWalking } from "react-icons/fa";
 import { MdRoute } from "react-icons/md";
 import DeliveryLayout from "../layouts/DeliveryLayout";

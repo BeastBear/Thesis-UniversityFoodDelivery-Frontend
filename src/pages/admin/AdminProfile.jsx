@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { serverUrl } from "../../App";
+import { serverUrl } from "../../config";
 import { setUserData } from "../../redux/userSlice";
 import { toast } from "react-toastify";
 import { FaCamera, FaEnvelope, FaPhone, FaSave, FaUser } from "react-icons/fa";

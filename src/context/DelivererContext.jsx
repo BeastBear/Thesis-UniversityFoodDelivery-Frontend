@@ -7,7 +7,7 @@ import React, {
   useState,
 } from "react";
 import axios from "axios";
-import { serverUrl } from "../App";
+import { serverUrl } from "../config";
 
 const DelivererContext = createContext({
   isOnline: false,

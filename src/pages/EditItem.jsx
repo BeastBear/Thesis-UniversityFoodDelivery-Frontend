@@ -4,7 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { FaPlus, FaTimes, FaStar, FaCamera } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
-import { serverUrl } from "../App";
+import { serverUrl } from "../config";
 import { setMyShopData } from "../redux/ownerSlice";
 import { ClipLoader } from "react-spinners";
 import { toast } from "react-toastify";

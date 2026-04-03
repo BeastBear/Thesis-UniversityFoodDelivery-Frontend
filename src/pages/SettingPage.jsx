@@ -3,7 +3,7 @@ import { IoIosArrowRoundBack, IoIosArrowForward } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import axios from "axios";
-import { serverUrl } from "../App";
+import { serverUrl } from "../config";
 import { setUserData } from "../redux/userSlice";
 import { toast } from "react-toastify";
 import Card from "../components/ui/Card";

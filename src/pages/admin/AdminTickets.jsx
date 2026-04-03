@@ -8,7 +8,7 @@ import {
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { serverUrl } from "../../App";
+import { serverUrl } from "../../config";
 import AdminTicketSubjects from "./AdminTicketSubjects";
 
 const AdminTickets = () => {

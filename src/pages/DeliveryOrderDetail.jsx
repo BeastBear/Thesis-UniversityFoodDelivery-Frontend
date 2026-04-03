@@ -4,7 +4,7 @@ import axios from "axios";
 import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { MdRoute } from "react-icons/md";
-import { serverUrl } from "../App";
+import { serverUrl } from "../config";
 import DeliveryLayout from "../layouts/DeliveryLayout";
 import DeliveryPageHero from "../components/Delivery/DeliveryPageHero";
 

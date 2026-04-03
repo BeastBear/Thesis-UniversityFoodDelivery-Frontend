@@ -16,7 +16,7 @@ import {
 } from "react-icons/fa";
 import { IoIosArrowBack } from "react-icons/io";
 import axios from "axios";
-import { serverUrl } from "../App";
+import { serverUrl } from "../config";
 import { setUserData } from "../redux/userSlice";
 import { useBackNavigation } from "../hooks/useBackNavigation";
 import { useUI, DEFAULT_HEADER_TITLE } from "../context/UIContext.jsx";

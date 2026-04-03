@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 
-import { serverUrl } from "../App";
+import { serverUrl } from "../config";
 import { updateMyLocation } from "../redux/userSlice";
 
 // Helper function to calculate distance in meters (Haversine formula)

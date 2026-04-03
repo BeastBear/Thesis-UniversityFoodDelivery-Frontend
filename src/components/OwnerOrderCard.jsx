@@ -2,7 +2,7 @@ import axios from "axios";
 import React, { useState, useEffect } from "react";
 import { MdPhone, MdAccessTime, MdRestaurant, MdPerson } from "react-icons/md";
 import { FaCheck, FaExclamationCircle } from "react-icons/fa";
-import { serverUrl } from "../App";
+import { serverUrl } from "../config";
 import { useDispatch } from "react-redux";
 import { updateOrderStatus } from "../redux/userSlice";
 import { useNavigate } from "react-router-dom";

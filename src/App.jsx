@@ -93,7 +93,7 @@ import AdminTicketChat from "./pages/admin/AdminTicketChat";
 
 
 import { serverUrl, socketUrl } from "./config";
-export { serverUrl, socketUrl };
+
 
 
 function ShopRouteRedirect() {

@@ -14,7 +14,7 @@ import L from "leaflet";
 import * as turf from "@turf/turf";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { serverUrl } from "../App";
+import { serverUrl } from "../config";
 
 // Fix Leaflet marker icon issue
 delete L.Icon.Default.prototype._getIconUrl;

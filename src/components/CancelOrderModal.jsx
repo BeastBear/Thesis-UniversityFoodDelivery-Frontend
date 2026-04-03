@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { serverUrl } from "../App";
+import { serverUrl } from "../config";
 import { toast } from "react-toastify";
 import { MdEdit } from "react-icons/md";
 

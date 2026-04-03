@@ -13,7 +13,7 @@ import {
   FaMotorcycle,
   FaCheckCircle,
 } from "react-icons/fa";
-import { serverUrl } from "../App";
+import { serverUrl } from "../config";
 import { useDispatch, useSelector } from "react-redux";
 import { updateOrderStatus } from "../redux/userSlice";
 import { toast } from "react-toastify";

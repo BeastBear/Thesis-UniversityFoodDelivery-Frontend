@@ -32,7 +32,7 @@ import { DELIVERY_CONFIG, CREDIT_CONFIG } from "../config/constants";
 import { setAddress, setLocation } from "../redux/mapSlice";
 import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
-import { serverUrl } from "../App";
+import { serverUrl } from "../config";
 import {
   addMyOrder,
   clearCart,

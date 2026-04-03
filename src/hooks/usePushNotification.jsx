@@ -2,7 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 import { urlBase64ToUint8Array } from "../utils/urlBase64ToUint8Array";
 import { toast } from "react-toastify";
-import { serverUrl } from "../App";
+import { serverUrl } from "../config";
 
 export const usePushNotification = () => {
   const [loading, setLoading] = useState(false);

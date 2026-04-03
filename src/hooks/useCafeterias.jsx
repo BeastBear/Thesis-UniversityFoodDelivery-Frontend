@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { serverUrl } from "../App";
+import { serverUrl } from "../config";
 import { DELIVERY_CONFIG } from "../config/constants";
 
 // Default fallbacks for backward compatibility and initial load

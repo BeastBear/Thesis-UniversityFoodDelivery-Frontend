@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import { setUserData, setAuthLoading, setCurrentCafeteria, setShopsInMyCity, setItemsInMyCity } from "../redux/userSlice";
-import { serverUrl } from "../App";
+import { serverUrl } from "../config";
 
 function useGetCurrentUser() {
   const dispatch = useDispatch();

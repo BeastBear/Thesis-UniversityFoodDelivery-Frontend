@@ -1,6 +1,6 @@
 import axios from "axios";
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { serverUrl } from "../App";
+import { serverUrl } from "../config";
 import { useNavigate, useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";

@@ -10,7 +10,7 @@ import {
 } from "react-icons/fa";
 import { ClipLoader } from "react-spinners";
 import axios from "axios";
-import { serverUrl } from "../App";
+import { serverUrl } from "../config";
 import { toast } from "react-toastify";
 import Card from "../components/ui/Card";
 import PrimaryButton from "../components/ui/PrimaryButton";

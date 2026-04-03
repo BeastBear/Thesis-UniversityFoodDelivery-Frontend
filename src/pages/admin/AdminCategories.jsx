@@ -9,7 +9,7 @@ import {
   FaArrowUp,
   FaArrowDown,
 } from "react-icons/fa";
-import { serverUrl } from "../../App";
+import { serverUrl } from "../../config";
 
 const AdminCategories = () => {
   const [loading, setLoading] = useState(true);

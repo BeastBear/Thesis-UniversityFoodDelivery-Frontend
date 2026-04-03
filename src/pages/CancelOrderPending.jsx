@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { IoIosArrowRoundBack } from "react-icons/io";
 import { MdEdit, MdPhone } from "react-icons/md";
-import { serverUrl } from "../App";
+import { serverUrl } from "../config";
 import { ClipLoader } from "react-spinners";
 import { useDispatch } from "react-redux";
 import { setMyShopData } from "../redux/ownerSlice";

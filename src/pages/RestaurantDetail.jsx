@@ -1,6 +1,6 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { serverUrl } from "../App";
+import { serverUrl } from "../config";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import {

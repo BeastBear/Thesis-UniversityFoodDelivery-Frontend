@@ -9,7 +9,7 @@ import React, {
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import axios from "axios";
-import { serverUrl } from "../App";
+import { serverUrl } from "../config";
 import {
   FaBell,
   FaCog,

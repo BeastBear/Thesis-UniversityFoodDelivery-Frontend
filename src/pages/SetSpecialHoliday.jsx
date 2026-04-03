@@ -6,7 +6,7 @@ import "react-date-picker/dist/DatePicker.css";
 import "react-calendar/dist/Calendar.css";
 import { ClipLoader } from "react-spinners";
 import axios from "axios";
-import { serverUrl } from "../App";
+import { serverUrl } from "../config";
 import { useSelector, useDispatch } from "react-redux";
 import { setMyShopData } from "../redux/ownerSlice";
 import Card from "../components/ui/Card";

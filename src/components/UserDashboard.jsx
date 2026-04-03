@@ -12,7 +12,7 @@ import {
 import { useSelector } from "react-redux";
 import { categories } from "../../category.js";
 import axios from "axios";
-import { serverUrl } from "../App";
+import { serverUrl } from "../config";
 import { useNavigate } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import useCafeterias from "../hooks/useCafeterias";

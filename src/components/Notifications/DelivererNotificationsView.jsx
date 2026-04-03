@@ -11,7 +11,7 @@ import EmptyState from "../ui/EmptyState";
 import PrimaryButton from "../ui/PrimaryButton";
 import DeliveryPageHero from "../Delivery/DeliveryPageHero";
 import axios from "axios";
-import { serverUrl } from "../../App";
+import { serverUrl } from "../../config";
 
 const DelivererNotificationsView = ({
   notifications,

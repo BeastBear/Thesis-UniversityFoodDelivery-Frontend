@@ -9,7 +9,7 @@ import {
   FaUserShield,
 } from "react-icons/fa";
 import axios from "axios";
-import { serverUrl } from "../../App";
+import { serverUrl } from "../../config";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import {

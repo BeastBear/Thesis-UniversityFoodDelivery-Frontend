@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { IoIosArrowRoundBack } from "react-icons/io";
 import { MdPhone, MdEdit } from "react-icons/md";
-import { serverUrl } from "../App";
+import { serverUrl } from "../config";
 import { ClipLoader } from "react-spinners";
 
 function EditOrderItems() {

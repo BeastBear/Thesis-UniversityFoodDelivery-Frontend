@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import axios from "axios";
-import { serverUrl } from "../App";
+import { serverUrl } from "../config";
 import { useHeaderTitle } from "../context/UIContext.jsx";
 
 import RestaurantListingCard from "../components/RestaurantListingCard";

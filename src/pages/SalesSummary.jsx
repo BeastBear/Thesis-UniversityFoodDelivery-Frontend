@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import axios from "axios";
-import { serverUrl } from "../App";
+import { serverUrl } from "../config";
 import { setMyOrders } from "../redux/userSlice";
 import { setMyShopData } from "../redux/ownerSlice";
 import { toast } from "react-toastify";

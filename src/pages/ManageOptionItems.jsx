@@ -7,7 +7,7 @@ import {
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import axios from "axios";
-import { serverUrl } from "../App";
+import { serverUrl } from "../config";
 import { ClipLoader } from "react-spinners";
 import { toast } from "react-toastify";
 import Card from "../components/ui/Card";

@@ -16,7 +16,7 @@ import {
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { IoIosArrowBack } from "react-icons/io";
 import axios from "axios";
-import { serverUrl } from "../App";
+import { serverUrl } from "../config";
 import { setUserData } from "../redux/userSlice";
 import { useUI, DEFAULT_HEADER_TITLE } from "../context/UIContext.jsx";
 

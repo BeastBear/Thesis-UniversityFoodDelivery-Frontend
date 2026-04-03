@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
-import { serverUrl } from "../../App";
+import { serverUrl } from "../../config";
 
 const AdminTicketChat = () => {
   const navigate = useNavigate();

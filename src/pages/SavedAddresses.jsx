@@ -16,7 +16,7 @@ import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import axios from "axios";
 import { setLocation, setAddress } from "../redux/mapSlice";
-import { serverUrl } from "../App";
+import { serverUrl } from "../config";
 import { setUserData } from "../redux/userSlice";
 import { toast } from "react-toastify";
 import Card from "../components/ui/Card";

@@ -11,7 +11,7 @@ import { HiOutlineClipboardCopy } from "react-icons/hi";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { serverUrl } from "../App";
+import { serverUrl } from "../config";
 import { setMyOrders } from "../redux/userSlice";
 import { setMyShopData } from "../redux/ownerSlice";
 import { toast } from "react-toastify";

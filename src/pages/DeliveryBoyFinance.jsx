@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from "react";
 
 import { useSelector, useDispatch } from "react-redux";
 import axios from "axios";
-import { serverUrl } from "../App";
+import { serverUrl } from "../config";
 import { useNavigate, useLocation } from "react-router-dom";
 import { FaWallet, FaFileInvoiceDollar } from "react-icons/fa";
 import { RiMoneyDollarCircleLine } from "react-icons/ri";

@@ -5,7 +5,7 @@ import { HiOutlineClipboardCopy } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { serverUrl } from "../App";
+import { serverUrl } from "../config";
 import { FaFileInvoiceDollar } from "react-icons/fa";
 import { toast } from "react-toastify";
 import DeliveryLayout from "../layouts/DeliveryLayout";
