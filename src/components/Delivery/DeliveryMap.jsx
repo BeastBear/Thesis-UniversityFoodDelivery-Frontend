@@ -35,40 +35,60 @@ const shopIcon = new L.Icon({
   iconAnchor: [17, 35],
 });
 
+// Ensure L is globally available for leaflet-routing-machine
+window.L = L;
+
 function Routing({ from, to }) {
   const map = useMap();
   const routingControlRef = useRef(null);
 
   useEffect(() => {
     if (!from || !to) return;
+    if (isNaN(from[0]) || isNaN(from[1]) || isNaN(to[0]) || isNaN(to[1])) {
+      console.warn("Invalid coordinates for routing:", { from, to });
+      return;
+    }
+
+    console.log("Routing from", from, "to", to);
 
     // Remove previous control
     if (routingControlRef.current) {
-      map.removeControl(routingControlRef.current);
+      try {
+        map.removeControl(routingControlRef.current);
+      } catch (e) {
+        console.error("Error removing routing control:", e);
+      }
     }
 
     const routingServiceUrl =
       import.meta.env.VITE_ROUTING_SERVICE_URL ||
-      "https://routing.openstreetmap.de/routed-car/route/v1";
+      "https://router.project-osrm.org/route/v1";
 
-    const routingControl = L.Routing.control({
-      router: L.Routing.osrmv1({
-        serviceUrl: routingServiceUrl,
-        profile: "driving",
-        useHints: false,
-      }),
-      waypoints: [L.latLng(from[0], from[1]), L.latLng(to[0], to[1])],
-      lineOptions: {
-        styles: [{ color: "#0066ff", weight: 6, opacity: 0.8 }],
-      },
-      addWaypoints: false,
-      draggableWaypoints: false,
-      fitSelectedRoutes: true,
-      createMarker: () => null,
-      show: false, // Hide text instructions
-    }).addTo(map);
+    try {
+      const routingControl = L.Routing.control({
+        router: L.Routing.osrmv1({
+          serviceUrl: routingServiceUrl,
+          profile: "driving",
+          useHints: false,
+        }),
+        waypoints: [L.latLng(from[0], from[1]), L.latLng(to[0], to[1])],
+        lineOptions: {
+          styles: [
+            { color: "#3B82F6", weight: 6, opacity: 0.8 }, // Tailwind Blue-500
+            { color: "white", weight: 2, opacity: 0.5 },
+          ],
+        },
+        addWaypoints: false,
+        draggableWaypoints: false,
+        fitSelectedRoutes: true,
+        createMarker: () => null,
+        show: false, // Hide text instructions
+      }).addTo(map);
 
-    routingControlRef.current = routingControl;
+      routingControlRef.current = routingControl;
+    } catch (err) {
+      console.error("Leaflet Routing Machine error:", err);
+    }
 
     return () => {
       if (routingControlRef.current) {
@@ -91,26 +111,26 @@ function Routing({ from, to }) {
 }
 
 const DeliveryMap = ({
-  deliveryBoyLocation,
+  delivererLocation,
   targetLocation,
   targetType = "customer",
 }) => {
   // Default center if no location provided
-  const center = deliveryBoyLocation
-    ? [deliveryBoyLocation.lat, deliveryBoyLocation.lon]
+  const center = delivererLocation
+    ? [delivererLocation.lat, delivererLocation.lon]
     : [13.7563, 100.5018]; // Bangkok default
 
   const delivererMarkerRef = useRef(null);
 
   // Update marker position dynamically
   useEffect(() => {
-    if (deliveryBoyLocation && delivererMarkerRef.current) {
+    if (delivererLocation && delivererMarkerRef.current) {
       delivererMarkerRef.current.setLatLng([
-        deliveryBoyLocation.lat,
-        deliveryBoyLocation.lon,
+        delivererLocation.lat,
+        delivererLocation.lon,
       ]);
     }
-  }, [deliveryBoyLocation]);
+  }, [delivererLocation]);
 
   return (
     <div className="w-full h-full relative z-0">
@@ -125,10 +145,10 @@ const DeliveryMap = ({
         />
 
         {/* Delivery Boy Marker */}
-        {deliveryBoyLocation && (
+        {delivererLocation && (
           <Marker
             ref={delivererMarkerRef}
-            position={[deliveryBoyLocation.lat, deliveryBoyLocation.lon]}
+            position={[delivererLocation.lat, delivererLocation.lon]}
             icon={scooterIcon}>
             <Popup>You</Popup>
           </Marker>
@@ -146,9 +166,9 @@ const DeliveryMap = ({
         )}
 
         {/* Routing */}
-        {deliveryBoyLocation && targetLocation && (
+        {delivererLocation && targetLocation && (
           <Routing
-            from={[deliveryBoyLocation.lat, deliveryBoyLocation.lon]}
+            from={[delivererLocation.lat, delivererLocation.lon]}
             to={[targetLocation.lat, targetLocation.lon]}
           />
         )}
