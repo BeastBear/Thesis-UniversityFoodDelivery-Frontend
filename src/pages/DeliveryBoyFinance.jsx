@@ -10,11 +10,9 @@ import { MdAccountBalanceWallet, MdAdd } from "react-icons/md";
 import { setUserData } from "../redux/userSlice";
 import DeliveryPageHero from "../components/Delivery/DeliveryPageHero";
 import { toast } from "react-toastify";
-import { loadStripe } from "@stripe/stripe-js";
+import { stripePromise } from "../utils/stripe.js";
 import { Elements, CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import { FaCcVisa, FaCcMastercard, FaCreditCard, FaQrcode } from "react-icons/fa";
-
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 function DeliveryBoyFinanceContent() {
   const stripe = useStripe();
@@ -41,6 +39,27 @@ function DeliveryBoyFinanceContent() {
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
+
+  const calculateFees = useCallback((amount, method) => {
+    if (!amount || isNaN(amount)) return { fee: 0, total: 0 };
+    const numAmount = parseFloat(amount);
+    let fee = 0;
+    if (method === "promptpay") {
+      // PromptPay: 1.65% + 7% VAT
+      const baseFee = numAmount * 0.0165;
+      const vat = baseFee * 0.07;
+      fee = baseFee + vat;
+    } else if (method === "card") {
+      // Card: 4.75% + 10B + 7% VAT
+      const baseFee = numAmount * 0.0475 + 10;
+      const vat = baseFee * 0.07;
+      fee = baseFee + vat;
+    }
+    return {
+      fee: Math.round(fee * 100) / 100,
+      total: Math.round((numAmount + fee) * 100) / 100,
+    };
+  }, []);
   const [financialData, setFinancialData] = useState({
     wallet: 0,
     availableWallet: 0,
@@ -462,26 +481,6 @@ function DeliveryBoyFinanceContent() {
     }
   };
 
-  const calculateFees = (amount, method) => {
-    if (!amount || isNaN(amount)) return { fee: 0, total: 0 };
-    const numAmount = parseFloat(amount);
-    let fee = 0;
-    if (method === "promptpay") {
-      // PromptPay: 1.65% + 7% VAT
-      const baseFee = numAmount * 0.0165;
-      const vat = baseFee * 0.07;
-      fee = baseFee + vat;
-    } else if (method === "card") {
-      // Card: 4.75% + 10B + 7% VAT
-      const baseFee = numAmount * 0.0475 + 10;
-      const vat = baseFee * 0.07;
-      fee = baseFee + vat;
-    }
-    return {
-      fee: Math.round(fee * 100) / 100,
-      total: Math.round((numAmount + fee) * 100) / 100,
-    };
-  };
 
   const handleTopUpCredit = async (amount = null) => {
     // Prevent multiple simultaneous requests
