@@ -153,6 +153,53 @@ function DeliveryBoy() {
   const [tempHistoryStartDate, setTempHistoryStartDate] = useState(null);
   const [tempHistoryEndDate, setTempHistoryEndDate] = useState(null);
 
+  // --- History Logic (Restored missing variables) ---
+  const [currentHistoryPage, setCurrentHistoryPage] = useState(1);
+  const historyItemsPerPage = 5;
+
+  const formatHistoryDate = (dateStr) => {
+    if (!dateStr) return "";
+    const d = new Date(dateStr);
+    return d.toLocaleDateString("en-US", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  const filteredHistoryOrders = useMemo(() => {
+    let list = [...historyOrders];
+
+    // Filter by Status
+    if (historyStatusFilter !== "all") {
+      list = list.filter((o) => {
+        const so = o.shopOrder || (Array.isArray(o.shopOrders) ? o.shopOrders[0] : null);
+        return so?.status === historyStatusFilter;
+      });
+    }
+
+    // Filter by Date
+    if (historyDateRange.startDate && historyDateRange.endDate) {
+      const start = new Date(historyDateRange.startDate).setHours(0, 0, 0, 0);
+      const end = new Date(historyDateRange.endDate).setHours(23, 59, 59, 999);
+      list = list.filter((o) => {
+        const d = new Date(o.createdAt).getTime();
+        return d >= start && d <= end;
+      });
+    }
+
+    return list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  }, [historyOrders, historyStatusFilter, historyDateRange]);
+
+  const historyEarnings = useMemo(() => {
+    return filteredHistoryOrders.reduce(
+      (sum, o) => sum + Number(o.deliveryFee || 0),
+      0,
+    );
+  }, [filteredHistoryOrders]);
+
   // States for UI
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [orderCountdowns, setOrderCountdowns] = useState({});
@@ -218,6 +265,47 @@ function DeliveryBoy() {
       console.error("Failed to fetch reviews:", err);
     } finally {
       setReviewsLoading(false);
+    }
+  }, [userData?._id]);
+
+  const fetchHistory = useCallback(async () => {
+    if (!userData?._id) return;
+    setHistoryLoading(true);
+    try {
+      const res = await axios.get(
+        `${serverUrl}/api/order/my-orders?t=${Date.now()}`,
+        {
+          withCredentials: true,
+        },
+      );
+
+      const orders = Array.isArray(res?.data)
+        ? res.data
+        : Array.isArray(res?.data?.orders)
+          ? res.data.orders
+          : [];
+
+      const myId = userData?._id?.toString();
+      const mine = orders.filter((order) => {
+        const shopOrders = Array.isArray(order?.shopOrders)
+          ? order.shopOrders
+          : [];
+        return shopOrders.some((so) => {
+          const assigned = so?.assignedDeliveryBoy;
+          const assignedId =
+            typeof assigned === "object"
+              ? assigned?._id?.toString()
+              : assigned?.toString();
+          return assignedId && myId && assignedId === myId;
+        });
+      });
+
+      setHistoryOrders(mine);
+    } catch (err) {
+      console.error("Failed to fetch history:", err);
+      setHistoryOrders([]);
+    } finally {
+      setHistoryLoading(false);
     }
   }, [userData?._id]);
 
@@ -301,6 +389,21 @@ function DeliveryBoy() {
   const handleAssignmentRemoved = useCallback(() => {
     fetchAssignments();
   }, [fetchAssignments]);
+
+  const handleStatusUpdate = useCallback(
+    (data) => {
+      const activeId = currentOrder?._id ? String(currentOrder._id) : "";
+      const incomingId = data?.orderId ? String(data.orderId) : "";
+
+      // If the update is for our current order, refresh its details
+      if (activeId && incomingId && activeId === incomingId) {
+        fetchCurrentOrder();
+      }
+      // Regardless, refresh assignments as other orders might have changed
+      fetchAssignments();
+    },
+    [currentOrder?._id, fetchCurrentOrder, fetchAssignments],
+  );
 
   const toggleDuty = useCallback(async () => {
     try {
@@ -446,6 +549,12 @@ function DeliveryBoy() {
   useEffect(() => {
     fetchReviews();
   }, [fetchReviews]);
+
+  useEffect(() => {
+    if (showHistory) {
+      fetchHistory();
+    }
+  }, [showHistory, fetchHistory]);
 
   useEffect(() => {
     fetchFinancialData();
