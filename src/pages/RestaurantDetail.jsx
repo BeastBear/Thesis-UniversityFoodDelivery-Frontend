@@ -360,11 +360,11 @@ function RestaurantDetail() {
                   </div>
                   {(shop?.owner?.mobile || shop?.owner?.phone || shop?.owner?.phoneNumber || shop.shopNumber) && (
                     <div className="shrink-0">
-                      <a
-                        href={`tel:${shop?.owner?.mobile || shop?.owner?.phone || shop?.owner?.phoneNumber || shop.shopNumber}`}
+                      <button
+                        onClick={handleCall}
                         className="flex items-center justify-center gap-2 px-6 py-3 bg-white text-gray-900 font-bold rounded-xl hover:bg-gray-100 transition-colors border border-gray-200">
                         <FaPhone className="text-gray-500" /> Call Now
-                      </a>
+                      </button>
                     </div>
                   )}
                 </div>

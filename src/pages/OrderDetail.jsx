@@ -392,20 +392,33 @@ function OrderDetail() {
               ) : (
                 <button
                   onClick={() => {
+                    const getValidPhone = (num) => {
+                      if (!num) return null;
+                      const cleanNum = String(num).replace(/[^0-9]/g, "");
+                      return cleanNum.length >= 9 ? cleanNum : null;
+                    };
+
                     const ownerPhone = 
-                      shopOrder.owner?.mobile || 
-                      shopOrder.owner?.phone || 
-                      shopOrder.owner?.phoneNumber ||
-                      shopOrder.shop?.owner?.mobile || 
-                      shopOrder.shop?.owner?.phone || 
-                      shopOrder.shop?.owner?.phoneNumber;
-                    const shopPhone = shopOrder.shop?.shopNumber;
+                      getValidPhone(shopOrder.owner?.mobile) || 
+                      getValidPhone(shopOrder.owner?.phone) || 
+                      getValidPhone(shopOrder.owner?.phoneNumber) ||
+                      getValidPhone(shopOrder.shop?.owner?.mobile) || 
+                      getValidPhone(shopOrder.shop?.owner?.phone) || 
+                      getValidPhone(shopOrder.shop?.owner?.phoneNumber) ||
+                      getValidPhone(shopOrder.shop?.owner?.ownerVerification?.owner?.mobile);
+
+                    const shopPhone = getValidPhone(shopOrder.shop?.shopNumber);
                     const callTarget = ownerPhone || shopPhone;
 
                     if (callTarget) {
                       window.location.href = `tel:${callTarget}`;
                     } else {
-                      toast.error("Restaurant phone number not available");
+                      const rawShopNum = shopOrder.shop?.shopNumber;
+                      if (rawShopNum && rawShopNum.length < 9) {
+                        toast.error(`Restaurant phone not available. (Note: "${rawShopNum}" appears to be a lot number, not a phone number)`);
+                      } else {
+                        toast.error("Restaurant phone number not available");
+                      }
                     }
                   }}
                   className="w-full px-4 py-3 rounded-2xl flex items-center justify-center gap-2 text-sm font-bold transition-colors border"

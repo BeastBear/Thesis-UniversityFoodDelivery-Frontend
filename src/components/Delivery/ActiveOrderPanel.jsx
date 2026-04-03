@@ -55,11 +55,12 @@ const ActiveOrderPanel = ({
     order.user?.mobile || order.user?.phoneNumber || order.user?.phone || "N/A";
   const ownerPhone =
     order.shopOrder?.owner?.mobile ||
-    order.shopOrder?.owner?.phoneNumber ||
     order.shopOrder?.owner?.phone ||
+    order.shopOrder?.owner?.phoneNumber ||
     order.shopOrder?.shop?.owner?.mobile ||
-    order.shopOrder?.shop?.owner?.phoneNumber ||
     order.shopOrder?.shop?.owner?.phone ||
+    order.shopOrder?.shop?.owner?.phoneNumber ||
+    order.shopOrder?.shop?.owner?.ownerVerification?.owner?.mobile ||
     "";
   const shopPhone =
     order.shopOrder?.shop?.mobile ||
@@ -105,7 +106,10 @@ const ActiveOrderPanel = ({
     .trim()
     .replace(/\s+/g, "")
     .replace(/[^\d+]/g, "");
-  const canCall = normalizedPhone.length >= 6;
+  
+  // Use 9 digits as minimum for a valid Thai phone number (mobile 10, landline 9)
+  // This prevents short lot numbers like "01" from being used as a phone number.
+  const canCall = normalizedPhone.length >= 9;
 
   return (
     <div
