@@ -26,22 +26,18 @@ function IncomeSummary() {
   const [showOrdersList, setShowOrdersList] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Generate date list for horizontal scrolling (for daily view)
-  const generateDateList = () => {
+  const dateList = useMemo(() => {
     const dates = [];
     const today = new Date();
-    today.setHours(23, 59, 59, 999); // Set to end of today for comparison
-
-    // Show 7 days before and today (no future dates)
-    for (let i = -7; i <= 0; i++) {
+    // Show today + 7 days before, with today FIRST
+    for (let i = 0; i <= 7; i++) {
       const date = new Date(today);
-      date.setDate(today.getDate() + i);
+      date.setDate(today.getDate() - i);
+      date.setHours(0, 0, 0, 0);
       dates.push(date);
     }
-    return dates;
-  };
-
-  const dateList = useMemo(() => generateDateList(), []);
+    return dates; // today is index 0
+  }, []);
 
   // Format date for display
   const formatDateDisplay = (date) => {
@@ -125,9 +121,15 @@ function IncomeSummary() {
           if (!isOnlinePayment) return; // Skip COD orders
 
           order.shopOrders.forEach((shopOrder) => {
+            // Handle assignedDeliveryBoy as either a populated object or a plain ID string
+            const assigned = shopOrder.assignedDeliveryBoy;
+            const assignedId =
+              assigned && typeof assigned === "object"
+                ? assigned._id?.toString()
+                : assigned?.toString();
+
             if (
-              shopOrder.assignedDeliveryBoy?.toString() ===
-                userData._id?.toString() &&
+              assignedId === userData._id?.toString() &&
               shopOrder.status === "delivered" &&
               shopOrder.deliveredAt
             ) {
@@ -139,9 +141,8 @@ function IncomeSummary() {
                 completedCount++;
                 // Add delivery fee only once per order
                 if (!processedOrderIds.has(order._id.toString())) {
-                  totalIncome += order.deliveryFee || 0;
+                  totalIncome += Number(order.deliveryFee) || 0;
                   processedOrderIds.add(order._id.toString());
-                  // Store order for list display
                   completedOrders.push({
                     ...order,
                     shopOrder,
@@ -210,9 +211,15 @@ function IncomeSummary() {
             if (!isOnlinePayment) return; // Skip COD orders
 
             order.shopOrders.forEach((shopOrder) => {
+              // Handle assignedDeliveryBoy as either populated object or plain ID
+              const assigned = shopOrder.assignedDeliveryBoy;
+              const assignedId =
+                assigned && typeof assigned === "object"
+                  ? assigned._id?.toString()
+                  : assigned?.toString();
+
               if (
-                shopOrder.assignedDeliveryBoy?.toString() ===
-                  userData._id?.toString() &&
+                assignedId === userData._id?.toString() &&
                 shopOrder.status === "delivered" &&
                 shopOrder.deliveredAt
               ) {
@@ -222,7 +229,7 @@ function IncomeSummary() {
                   deliveredDate <= previousEndDate
                 ) {
                   if (!processedOrderIds.has(order._id.toString())) {
-                    previousIncome += order.deliveryFee || 0;
+                    previousIncome += Number(order.deliveryFee) || 0;
                     processedOrderIds.add(order._id.toString());
                   }
                 }
@@ -347,7 +354,6 @@ function IncomeSummary() {
             </button>
           </div>
 
-          {/* Date Selector (for daily view) */}
           {selectedTab === "daily" && (
             <div className="mb-6 overflow-x-auto pb-2">
               <div className="flex gap-3 min-w-max">
@@ -357,6 +363,7 @@ function IncomeSummary() {
                     date.getDate() === selectedDate.getDate() &&
                     date.getMonth() === selectedDate.getMonth() &&
                     date.getFullYear() === selectedDate.getFullYear();
+                  const isToday = index === 0;
 
                   return (
                     <button
@@ -364,10 +371,10 @@ function IncomeSummary() {
                       onClick={() => setSelectedDate(new Date(date))}
                       className={`flex flex-col items-center px-4 py-2 rounded-2xl min-w-[74px] transition-colors border ${
                         isSelected
-                          ? "bg-blue-50 text-blue-700 border-blue-100"
+                          ? "bg-blue-600 text-white border-blue-600"
                           : "bg-white text-slate-600 border-slate-100"
                       }`}>
-                      <span className="text-xs mb-1">{dayName}</span>
+                      <span className="text-xs mb-1">{isToday ? "Today" : dayName}</span>
                       <span className="text-sm font-extrabold">
                         {day} {month}
                       </span>
