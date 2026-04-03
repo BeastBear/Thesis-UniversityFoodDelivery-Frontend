@@ -21,7 +21,7 @@ import {
   FaPhoneAlt,
   FaComments,
 } from "react-icons/fa";
-import DelivererTracking from "../components/DeliveryBoyTracking";
+import DeliveryBoyTracking from "../components/DeliveryBoyTracking";
 import ReviewDelivery from "./ReviewDelivery";
 import { useSelector } from "react-redux";
 import Card from "../components/ui/Card";
