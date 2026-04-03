@@ -46,9 +46,7 @@ import EmptyState from "../components/ui/EmptyState";
 import PrimaryButton from "../components/ui/PrimaryButton";
 import { useHeaderTitle } from "../context/UIContext.jsx";
 import useCafeterias from "../hooks/useCafeterias";
-import { loadStripe } from '@stripe/stripe-js';
-
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+import { getStripePromise } from "../utils/stripe.js";
 
 function CartPage() {
   const navigate = useNavigate();
@@ -140,7 +138,7 @@ function CartPage() {
     if (pollingClientSecret && promptPayQrUrl) {
       intervalId = setInterval(async () => {
         try {
-           const stripe = await stripePromise;
+           const stripe = await getStripePromise();
            const { paymentIntent } = await stripe.retrievePaymentIntent(pollingClientSecret);
            if (paymentIntent && paymentIntent.status === 'succeeded') {
               clearInterval(intervalId);
@@ -376,7 +374,7 @@ function CartPage() {
   const processCardPayment = async (orderIdToPay) => {
     let isSuccess = false;
     try {
-      const stripe = await stripePromise;
+      const stripe = await getStripePromise();
       const chargeRes = await axios.post(
         `${serverUrl}/api/order/charge-saved-card`,
         { orderId: orderIdToPay, paymentMethodId: defaultCard.stripePaymentMethodId },
@@ -416,7 +414,7 @@ function CartPage() {
 
   const processPromptPayPayment = async (orderIdToPay) => {
     try {
-      const stripe = await stripePromise;
+      const stripe = await getStripePromise();
       const res = await axios.post(
         `${serverUrl}/api/order/create-promptpay-intent`,
         { orderId: orderIdToPay },

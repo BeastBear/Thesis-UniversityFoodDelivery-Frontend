@@ -7,15 +7,13 @@ import { useDispatch, useSelector } from "react-redux";
 import { serverUrl } from "../config";
 import { setUserData } from "../redux/userSlice";
 import { toast } from "react-toastify";
-import { loadStripe } from '@stripe/stripe-js';
+import { getStripePromise } from "../utils/stripe.js";
 import {
   CardElement,
   Elements,
   useStripe,
   useElements,
 } from '@stripe/react-stripe-js';
-
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 const SetupForm = ({ clientSecret }) => {
   const stripe = useStripe();
@@ -183,7 +181,7 @@ function AddCardPage() {
   return (
     <div className="min-h-screen bg-white flex flex-col pb-24">
       {clientSecret ? (
-        <Elements stripe={stripePromise} options={{ clientSecret }}>
+        <Elements stripe={getStripePromise()} options={{ clientSecret }}>
           <SetupForm clientSecret={clientSecret} />
         </Elements>
       ) : (
