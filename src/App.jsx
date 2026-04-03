@@ -91,10 +91,9 @@ import AdminNotifications from "./pages/admin/AdminNotifications";
 import AdminProfile from "./pages/admin/AdminProfile";
 import AdminTicketChat from "./pages/admin/AdminTicketChat";
 
-// Default to backend's configured port (5000) when no env override is provided.
-export const serverUrl =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
-const socketUrl = import.meta.env.VITE_SOCKET_URL || serverUrl;
+
+export { serverUrl, socketUrl } from "./config";
+
 
 function ShopRouteRedirect() {
   const { shopId } = useParams();
