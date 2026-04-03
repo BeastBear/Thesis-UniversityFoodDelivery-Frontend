@@ -10,56 +10,36 @@ import { MdAccountBalanceWallet, MdAdd } from "react-icons/md";
 import { setUserData } from "../redux/userSlice";
 import DeliveryPageHero from "../components/Delivery/DeliveryPageHero";
 import { toast } from "react-toastify";
-import { stripePromise } from "../utils/stripe.js";
+import { getStripePromise } from "../utils/stripe.js";
 import { Elements, CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import { FaCcVisa, FaCcMastercard, FaCreditCard, FaQrcode } from "react-icons/fa";
+
+const CARD_ELEMENT_OPTIONS = {
+  style: {
+    base: {
+      color: "#32325d",
+      fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
+      fontSmoothing: "antialiased",
+      fontSize: "16px",
+      "::placeholder": {
+        color: "#aab7c4",
+      },
+    },
+    invalid: {
+      color: "#fa755a",
+      iconColor: "#fa755a",
+    },
+  },
+};
 
 function DeliveryBoyFinanceContent() {
   const stripe = useStripe();
   const elements = useElements();
   const { userData, socket } = useSelector((state) => state.user);
-
-  const CARD_ELEMENT_OPTIONS = {
-    style: {
-      base: {
-        color: "#32325d",
-        fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
-        fontSmoothing: "antialiased",
-        fontSize: "16px",
-        "::placeholder": {
-          color: "#aab7c4",
-        },
-      },
-      invalid: {
-        color: "#fa755a",
-        iconColor: "#fa755a",
-      },
-    },
-  };
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
 
-  const calculateFees = useCallback((amount, method) => {
-    if (!amount || isNaN(amount)) return { fee: 0, total: 0 };
-    const numAmount = parseFloat(amount);
-    let fee = 0;
-    if (method === "promptpay") {
-      // PromptPay: 1.65% + 7% VAT
-      const baseFee = numAmount * 0.0165;
-      const vat = baseFee * 0.07;
-      fee = baseFee + vat;
-    } else if (method === "card") {
-      // Card: 4.75% + 10B + 7% VAT
-      const baseFee = numAmount * 0.0475 + 10;
-      const vat = baseFee * 0.07;
-      fee = baseFee + vat;
-    }
-    return {
-      fee: Math.round(fee * 100) / 100,
-      total: Math.round((numAmount + fee) * 100) / 100,
-    };
-  }, []);
   const [financialData, setFinancialData] = useState({
     wallet: 0,
     availableWallet: 0,
@@ -82,18 +62,38 @@ function DeliveryBoyFinanceContent() {
   // Helper to get default card
   const defaultCard = React.useMemo(() => {
     if (userData?.savedCards?.length > 0) {
-      return userData.savedCards.find((c) => c.isDefault) || userData.savedCards[0];
+      return (
+        userData.savedCards.find((c) => c.isDefault) || userData.savedCards[0]
+      );
     }
     return null;
   }, [userData]);
 
-  // ─── FETCH FINANCIAL DATA declared before useEffects that reference it (prevents TDZ crash) ───
+  // Hoisted function declarations for reliability
+  function calculateFees(amount, method) {
+    if (!amount || isNaN(amount)) return { fee: 0, total: 0 };
+    const numAmount = parseFloat(amount);
+    let fee = 0;
+    if (method === "promptpay") {
+      const baseFee = numAmount * 0.0165;
+      const vat = baseFee * 0.07;
+      fee = baseFee + vat;
+    } else if (method === "card") {
+      const baseFee = numAmount * 0.0475 + 10;
+      const vat = baseFee * 0.07;
+      fee = baseFee + vat;
+    }
+    return {
+      fee: Math.round(fee * 100) / 100,
+      total: Math.round((numAmount + fee) * 100) / 100,
+    };
+  }
+
+  // ─── FETCH FINANCIAL DATA ───
   const fetchFinancialData = useCallback(async () => {
     if (!userData?._id) return;
 
     try {
-      // Fetch all orders to calculate total earnings (wallet should be total earnings from all delivered orders)
-      // Add timestamp to prevent caching
       const ordersResult = await axios.get(
         `${serverUrl}/api/order/my-orders?t=${new Date().getTime()}`,
         {
@@ -102,23 +102,18 @@ function DeliveryBoyFinanceContent() {
       );
       const orders = ordersResult.data || [];
 
-      // Calculate total earnings from all delivered orders
       let totalEarnings = 0;
       const processedOrderIds = new Set();
 
       orders.forEach((order) => {
         if (!order.shopOrders) return;
-
-        // Filter: Only include orders with online payment methods (exclude COD)
         const paymentMethod = String(order.paymentMethod || "").toLowerCase();
         const isOnlinePayment = ["online", "promptpay", "card"].includes(
           paymentMethod,
         );
-
-        if (!isOnlinePayment) return; // Skip COD orders
+        if (!isOnlinePayment) return;
 
         order.shopOrders.forEach((shopOrder) => {
-          // Check if this shop order is assigned to current user and is delivered
           const isAssigned =
             shopOrder.assignedDeliveryBoy?.toString() ===
               userData._id?.toString() ||
@@ -127,14 +122,7 @@ function DeliveryBoyFinanceContent() {
                 userData._id?.toString());
 
           if (isAssigned && shopOrder.status === "delivered") {
-            const deliveredDate = shopOrder.deliveredAt 
-              ? new Date(shopOrder.deliveredAt)
-              : new Date(shopOrder.updatedAt || order.updatedAt);
-            
-            // Add delivery fee only once per order
             if (!processedOrderIds.has(order._id.toString())) {
-              // Calculate total earnings
-              // Wallet = Delivery Fee
               const deliveryFee = Number(order.deliveryFee) || 0;
               totalEarnings += deliveryFee;
               processedOrderIds.add(order._id.toString());
@@ -143,92 +131,54 @@ function DeliveryBoyFinanceContent() {
         });
       });
 
-      // Fetch updated user data to get the latest jobCredit and payouts
       const userRes = await axios.get(
         `${serverUrl}/api/user/current?t=${new Date().getTime()}`,
         {
           withCredentials: true,
         },
       );
-      dispatch(setUserData(userRes.data)); // Update Redux state with latest user data
+      dispatch(setUserData(userRes.data));
 
       const jobCredit = userRes.data?.jobCredit || 0;
-
-      // Check if there are any pending payouts
-      let hasPendingPayout = false;
-      if (userRes.data?.payouts && Array.isArray(userRes.data.payouts)) {
-        hasPendingPayout = userRes.data.payouts.some(
-          (payout) => payout.status?.toLowerCase() === "pending",
-        );
-      }
-
-      // Calculate total withdrawals (in_transit, paid, or on_hold)
-      // Also track pending payouts to deduct them from available balance
-      // IMPORTANT: Only count MANUAL payouts as withdrawals, not automatic credits
       let totalWalletWithdrawals = 0;
       let pendingWalletWithdrawals = 0;
       let onHoldAmount = 0;
-
-      // Track automatic credits from COD orders that should be excluded
       let codCreditsToExclude = 0;
 
       if (userRes.data?.payouts && Array.isArray(userRes.data.payouts)) {
-        userRes.data.payouts.forEach((payout, index) => {
+        userRes.data.payouts.forEach((payout) => {
           const payoutStatus = payout.status?.toLowerCase() || "";
-          const payoutAmount = Number(payout.amount) || 0;
-          const source = payout.source || "wallet"; // Default to wallet
+          const payoutAmountVal = Number(payout.amount) || 0;
+          const source = payout.source || "wallet";
           const payoutType = payout.type || "manual";
 
-          // Only track wallet withdrawals here. Job credit withdrawals are directly deducted from jobCredit in DB.
           if (source === "wallet") {
-            // Check if this is an automatic credit from a COD order
             if (payoutType === "automatic" && payout.orderId) {
-              // Find the order to check if it's COD
               const relatedOrder = orders.find(
                 (o) => o._id?.toString() === payout.orderId?.toString(),
               );
-              if (relatedOrder) {
-                const paymentMethod = String(
-                  relatedOrder.paymentMethod || "",
-                ).toLowerCase();
-                if (paymentMethod === "cod") {
-                  // This is a COD order credit that shouldn't be in wallet
-                  codCreditsToExclude += payoutAmount;
-                }
-              } else {
-                // If order not found in current orders list, check via API
-                // For now, we'll exclude any automatic credit that we can't verify
-                // This is a safety measure - in production, you might want to fetch the order
+              if (
+                relatedOrder &&
+                String(relatedOrder.paymentMethod || "").toLowerCase() === "cod"
+              ) {
+                codCreditsToExclude += payoutAmountVal;
               }
-            } else if (payoutType === "automatic" && !payout.orderId) {
-              // Automatic credit without orderId - might be from COD, exclude to be safe
-              // Or you could fetch all orders to verify, but that's expensive
             }
 
-            // Only count MANUAL payouts as withdrawals (user-initiated withdrawals)
             if (payoutType === "manual") {
               if (payoutStatus === "pending") {
-                pendingWalletWithdrawals += payoutAmount;
+                pendingWalletWithdrawals += payoutAmountVal;
               } else if (
-                payoutStatus === "in_transit" ||
-                payoutStatus === "paid" ||
-                payoutStatus === "on_hold"
+                ["in_transit", "paid", "on_hold"].includes(payoutStatus)
               ) {
-                totalWalletWithdrawals += payoutAmount;
-
-                // Track on hold amount separately
-                if (payoutStatus === "on_hold") {
-                  onHoldAmount += payoutAmount;
-                }
+                totalWalletWithdrawals += payoutAmountVal;
+                if (payoutStatus === "on_hold") onHoldAmount += payoutAmountVal;
               }
             }
           }
         });
       }
 
-      // Calculate financial stats
-      // Wallet = Total Earnings (from online orders) - COD Credits (if any were incorrectly added) - Total Withdrawals (Processed)
-      // Subtract COD credits that were incorrectly added to wallet before the fix
       const adjustedEarnings = Math.max(0, totalEarnings - codCreditsToExclude);
       const netWalletBalance = Math.max(
         0,
@@ -239,62 +189,41 @@ function DeliveryBoyFinanceContent() {
         netWalletBalance - pendingWalletWithdrawals,
       );
 
-      const displayWallet = availableWalletBalance;
-      const displayJobCredit = jobCredit;
-
-      // Withdrawable Wallet shows available wallet funds
-      const displayWithdrawableWallet = availableWalletBalance;
-
-      // Withdrawable Job Credit shows job credit
-      // Note: jobCredit from DB already has pending job credit withdrawals deducted
-      const displayWithdrawableJobCredit = displayJobCredit;
-
-      // Update state with separate available balances for modal use
       setFinancialData({
-        wallet: displayWallet,
-        availableWallet: availableWalletBalance, // Add this for withdrawal validation
-        jobCredit: displayJobCredit,
-        withdrawableWallet: displayWithdrawableWallet,
-        withdrawableJobCredit: displayWithdrawableJobCredit,
+        wallet: availableWalletBalance,
+        availableWallet: availableWalletBalance,
+        jobCredit: jobCredit,
+        withdrawableWallet: availableWalletBalance,
+        withdrawableJobCredit: jobCredit,
         onHoldAmount: onHoldAmount,
       });
-    } catch (error) {}
+    } catch (error) {
+      console.error("Fetch finance error:", error);
+    }
   }, [userData?._id, dispatch]);
 
-  // Fetch financial data separately
   useEffect(() => {
     if (userData?._id) {
       fetchFinancialData();
     }
   }, [userData?._id, fetchFinancialData]);
 
-  // Listen for socket events
   useEffect(() => {
     if (!socket) return;
-
-    const handleJobCreditUpdate = ({ jobCredit }) => {
-      // Refresh financial data to get the latest state (including pending payouts etc)
-      fetchFinancialData();
-    };
-
-    socket.on("job-credit-updated", handleJobCreditUpdate);
-
-    return () => {
-      socket.off("job-credit-updated", handleJobCreditUpdate);
-    };
+    const handleUpdate = () => fetchFinancialData();
+    socket.on("job-credit-updated", handleUpdate);
+    return () => socket.off("job-credit-updated", handleUpdate);
   }, [socket, fetchFinancialData]);
 
-  // Lock body scroll when modal is open
   useEffect(() => {
     if (!showTopUpModal) return;
-    const previousOverflow = document.body.style.overflow;
+    const original = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
-      document.body.style.overflow = previousOverflow;
+      document.body.style.overflow = original;
     };
   }, [showTopUpModal]);
 
-  // Reset processing state when modal closes
   useEffect(() => {
     if (!showTopUpModal) {
       setIsProcessing(false);
@@ -302,24 +231,14 @@ function DeliveryBoyFinanceContent() {
     }
   }, [showTopUpModal]);
 
-  // Safety timeout to reset processing if stuck
-  useEffect(() => {
-    if (isProcessing) {
-      const timeout = setTimeout(() => {
-        setIsProcessing(false);
-      }, 30000);
-      return () => clearTimeout(timeout);
-    }
-  }, [isProcessing]);
-
-  // PromptPay polling — polls Stripe every 3s until payment succeeds
   useEffect(() => {
     let intervalId;
     if (pollingClientSecret && showTopUpModal) {
       intervalId = setInterval(async () => {
         try {
-          const stripeInstance = await stripePromise;
-          const { paymentIntent } = await stripeInstance.retrievePaymentIntent(pollingClientSecret);
+          const stripeInstance = await getStripePromise();
+          const { paymentIntent } =
+            await stripeInstance.retrievePaymentIntent(pollingClientSecret);
           if (paymentIntent && paymentIntent.status === "succeeded") {
             clearInterval(intervalId);
             setPollingClientSecret(null);
@@ -328,21 +247,16 @@ function DeliveryBoyFinanceContent() {
             setTopUpAmount("");
             toast.success("Top up successful!");
             fetchFinancialData();
-            if (window.location.search) {
-              navigate("/delivery-boy-finance", { replace: true });
-            }
+            navigate("/delivery-boy-finance", { replace: true });
           }
         } catch (error) {
           console.error("Polling error:", error);
         }
       }, 3000);
     }
-    return () => {
-      if (intervalId) clearInterval(intervalId);
-    };
+    return () => clearInterval(intervalId);
   }, [pollingClientSecret, showTopUpModal, fetchFinancialData, navigate]);
 
-  // Close modal on Escape key
   useEffect(() => {
     const handleEscape = (e) => {
       if (e.key === "Escape" && showTopUpModal) {
@@ -357,89 +271,58 @@ function DeliveryBoyFinanceContent() {
     return () => window.removeEventListener("keydown", handleEscape);
   }, [showTopUpModal]);
 
-  // Handle Stripe Checkout return URLs
   useEffect(() => {
     if (!location.search) {
-      // Reset processing state when no payment params (normal page load)
       setIsProcessing(false);
       setShowTopUpModal(false);
       return;
     }
 
-    try {
+    const verifyPayment = async () => {
       const urlParams = new URLSearchParams(location.search);
       const payment = urlParams.get("payment");
       const sessionId = urlParams.get("session_id");
 
-      // Reset processing state and close modal
       setIsProcessing(false);
       setShowTopUpModal(false);
 
       if (payment === "success" && sessionId) {
-        // Verify and update credit
-        const verifyPayment = async () => {
-          try {
-            const result = await axios.post(
-              `${serverUrl}/api/user/verify-credit-topup`,
-              { sessionId },
-              { withCredentials: true },
-            );
-
-            // Fetch updated user data to get the latest jobCredit
-            const userRes = await axios.get(`${serverUrl}/api/user/current`, {
-              withCredentials: true,
-            });
-            dispatch(setUserData(userRes.data)); // Update Redux state
-
-            // Update financial data
-            setFinancialData((prev) => ({
-              ...prev,
-              jobCredit: result.data.newCredit || userRes.data?.jobCredit || 0,
-            }));
-
-            toast.success(
-              `Credit top-up successful! New credit: ฿${(
-                result.data.newCredit ||
-                userRes.data?.jobCredit ||
-                0
-              ).toFixed(2)}`,
-            );
-            navigate("/delivery-boy-finance", { replace: true });
-          } catch (error) {
-            const errorMessage =
-              error.response?.data?.message ||
-              error.message ||
-              "Payment verification failed. Please contact support.";
-            toast.error(`Error: ${errorMessage}`);
-            navigate("/delivery-boy-finance", { replace: true });
-          }
-        };
-        verifyPayment();
+        try {
+          await axios.post(
+            `${serverUrl}/api/user/verify-credit-topup`,
+            { sessionId },
+            { withCredentials: true },
+          );
+          const userRes = await axios.get(`${serverUrl}/api/user/current`, {
+            withCredentials: true,
+          });
+          dispatch(setUserData(userRes.data));
+          fetchFinancialData();
+          toast.success("Credit top-up successful!");
+          navigate("/delivery-boy-finance", { replace: true });
+        } catch (error) {
+          toast.error("Payment verification failed.");
+          navigate("/delivery-boy-finance", { replace: true });
+        }
       } else if (payment === "cancelled") {
         toast.info("Payment was cancelled.");
         navigate("/delivery-boy-finance", { replace: true });
       }
-    } catch (error) {
-      // Reset state on error
-      setIsProcessing(false);
-      setShowTopUpModal(false);
-    }
-  }, [location.search, navigate, dispatch]);
+    };
+    verifyPayment();
+  }, [location.search, navigate, dispatch, fetchFinancialData]);
 
-  const handleRequestPayout = async () => {
+  async function handleRequestPayout() {
     if (!payoutAmount || parseFloat(payoutAmount) <= 0) {
       toast.error("Please enter a valid payout amount");
       return;
     }
 
     if (parseFloat(payoutAmount) > financialData.availableWallet) {
-      toast.error(
-        `Insufficient wallet balance. Available: ฿${financialData.availableWallet.toFixed(2)}`,
-      );
+      toast.error(`Insufficient wallet balance.`);
       return;
     }
 
-    // Check if bank account is set up
     if (
       !userData?.ePaymentAccount?.accountNumber ||
       !userData?.ePaymentAccount?.bank
@@ -450,64 +333,48 @@ function DeliveryBoyFinanceContent() {
 
     setPayoutLoading(true);
     try {
-      const response = await axios.post(
+      await axios.post(
         `${serverUrl}/api/user/request-payout`,
-        {
-          amount: parseFloat(payoutAmount),
-        },
+        { amount: parseFloat(payoutAmount) },
         { withCredentials: true },
       );
 
       toast.success("Payout request submitted successfully!");
       setShowPayoutModal(false);
       setPayoutAmount("");
-
-      // Refresh financial data
       fetchFinancialData();
-
-      // Refresh user data
-      const userRes = await axios.get(`${serverUrl}/api/user/current`, {
-        withCredentials: true,
-      });
-      dispatch(setUserData(userRes.data));
     } catch (error) {
-      const errorMessage =
+      toast.error(
         error.response?.data?.message ||
-        error.message ||
-        "Failed to submit payout request. Please try again.";
-      toast.error(errorMessage);
+          error.message ||
+          "Failed to submit payout request.",
+      );
     } finally {
       setPayoutLoading(false);
     }
-  };
+  }
 
-
-  const handleTopUpCredit = async (amount = null) => {
-    // Prevent multiple simultaneous requests
+  async function handleTopUpCredit(amount = null) {
     if (isProcessing) return;
-
     const finalAmount = amount !== null ? amount : parseFloat(topUpAmount);
 
-    if (!finalAmount || finalAmount <= 0) {
-      toast.error("Please enter a valid amount");
-      return;
-    }
-
-    if (finalAmount < 1) {
+    if (!finalAmount || finalAmount <= 1) {
       toast.error("Minimum top-up amount is ฿1.00");
       return;
     }
 
     setIsProcessing(true);
     try {
-      const stripe = await stripePromise;
+      const stripeInstance = await getStripePromise();
 
       if (topUpPaymentMethod === "card" && defaultCard?.stripePaymentMethodId) {
-        // Use saved card
         const response = await axios.post(
           `${serverUrl}/api/user/charge-saved-card-topup`,
-          { amount: finalAmount, paymentMethodId: defaultCard.stripePaymentMethodId },
-          { withCredentials: true }
+          {
+            amount: finalAmount,
+            paymentMethodId: defaultCard.stripePaymentMethodId,
+          },
+          { withCredentials: true },
         );
 
         if (response.data.status === "succeeded") {
@@ -516,18 +383,18 @@ function DeliveryBoyFinanceContent() {
           setTopUpAmount("");
           fetchFinancialData();
         } else if (response.data.status === "requires_action") {
-          const { error, paymentIntent } = await stripe.handleNextAction({
-            clientSecret: response.data.clientSecret,
-          });
+          const { error, paymentIntent } =
+            await stripeInstance.handleNextAction({
+              clientSecret: response.data.clientSecret,
+            });
 
           if (error) {
             toast.error(error.message);
           } else if (paymentIntent && paymentIntent.status === "succeeded") {
-            // Verify on backend
             await axios.post(
               `${serverUrl}/api/user/verify-credit-topup`,
               { paymentIntentId: paymentIntent.id },
-              { withCredentials: true }
+              { withCredentials: true },
             );
             toast.success("Top up successful!");
             setShowTopUpModal(false);
@@ -536,56 +403,58 @@ function DeliveryBoyFinanceContent() {
           }
         }
       } else if (topUpPaymentMethod === "promptpay") {
-        // PromptPay
         const response = await axios.post(
           `${serverUrl}/api/user/create-topup-payment-intent`,
           { amount: finalAmount, paymentMethod: "promptpay" },
-          { withCredentials: true }
+          { withCredentials: true },
         );
 
         const { clientSecret } = response.data;
-        const { error, paymentIntent } = await stripe.confirmPromptPayPayment(
-          clientSecret,
-          {
+        const { error, paymentIntent } =
+          await stripeInstance.confirmPromptPayPayment(clientSecret, {
             payment_method: {
-              type: 'promptpay',
+              type: "promptpay",
               billing_details: {
-                email: userData?.email || "guest@example.com"
-              }
-            }
-          }
-        );
+                email: userData?.email || "guest@example.com",
+              },
+            },
+          });
 
         if (error) {
           toast.error(error.message);
-        } else if (paymentIntent && paymentIntent.next_action?.promptpay_display_qr_code) {
-          setPromptPayQrUrl(paymentIntent.next_action.promptpay_display_qr_code.image_url_png);
+        } else if (
+          paymentIntent &&
+          paymentIntent.next_action?.promptpay_display_qr_code
+        ) {
+          setPromptPayQrUrl(
+            paymentIntent.next_action.promptpay_display_qr_code.image_url_png,
+          );
           setPollingClientSecret(clientSecret);
-        } else if (paymentIntent && paymentIntent.status === 'succeeded') {
+        } else if (paymentIntent && paymentIntent.status === "succeeded") {
           toast.success("Top up successful!");
           setShowTopUpModal(false);
           setTopUpAmount("");
           fetchFinancialData();
         }
       } else {
-        // New Card inline confirmation
-        if (!stripe || !elements) return;
-        
+        if (!stripeInstance || !elements) return;
+
         const response = await axios.post(
           `${serverUrl}/api/user/create-topup-payment-intent`,
           { amount: finalAmount, paymentMethod: "card" },
-          { withCredentials: true }
+          { withCredentials: true },
         );
 
         const { clientSecret } = response.data;
-        const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
-          payment_method: {
-            card: elements.getElement(CardElement),
-            billing_details: {
-              email: userData?.email || "guest@example.com"
-            }
-          }
-        });
+        const { error, paymentIntent } =
+          await stripeInstance.confirmCardPayment(clientSecret, {
+            payment_method: {
+              card: elements.getElement(CardElement),
+              billing_details: {
+                email: userData?.email || "guest@example.com",
+              },
+            },
+          });
 
         if (error) {
           toast.error(error.message);
@@ -597,12 +466,13 @@ function DeliveryBoyFinanceContent() {
         }
       }
     } catch (error) {
-      const errorMessage = error.response?.data?.message || error.message || "Payment failed";
-      toast.error(errorMessage);
+      toast.error(
+        error.response?.data?.message || error.message || "Payment failed",
+      );
     } finally {
       setIsProcessing(false);
     }
-  };
+  }
 
   if (!userData) {
     return (
@@ -1138,7 +1008,7 @@ function DeliveryBoyFinanceContent() {
 
 export default function DeliveryBoyFinance() {
   return (
-    <Elements stripe={stripePromise}>
+    <Elements stripe={getStripePromise()}>
       <DeliveryBoyFinanceContent />
     </Elements>
   );

@@ -1,11 +1,14 @@
 import { loadStripe } from "@stripe/stripe-js";
 
-// Initialize Stripe outside of the component lifecycle and main bundle initialization cycle
-// to prevent circular dependency issues (Temporal Dead Zone crashes)
-const stripePublishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
+let stripePromise = null;
 
-if (!stripePublishableKey) {
-  console.warn("Stripe Publishable Key is missing from environment variables.");
-}
-
-export const stripePromise = loadStripe(stripePublishableKey);
+export const getStripePromise = () => {
+  if (!stripePromise) {
+    const key = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
+    if (!key) {
+      console.warn("VITE_STRIPE_PUBLISHABLE_KEY is missing!");
+    }
+    stripePromise = loadStripe(key);
+  }
+  return stripePromise;
+};

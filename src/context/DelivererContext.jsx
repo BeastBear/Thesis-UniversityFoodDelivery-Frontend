@@ -16,7 +16,7 @@ const DelivererContext = createContext({
   setOnlineStatus: () => Promise.resolve(false),
 });
 
-export const DelivererProvider = ({ children }) => {
+export function DelivererProvider({ children }) {
   const [isOnline, setIsOnline] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -112,6 +112,8 @@ export const DelivererProvider = ({ children }) => {
       {children}
     </DelivererContext.Provider>
   );
-};
+}
 
-export const useDeliverer = () => useContext(DelivererContext);
+export function useDeliverer() {
+  return useContext(DelivererContext);
+}

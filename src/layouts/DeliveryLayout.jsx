@@ -26,7 +26,7 @@ export const DelivererDataContext = createContext({
   isOnline: false,
 });
 
-const useNotification = () => {
+function useNotification() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
 
@@ -129,7 +129,7 @@ const useNotification = () => {
   return { unreadCount, setUnreadCount, triggerNotification };
 };
 
-const useToast = () => {
+function useToast() {
   const [showToast, setShowToast] = useState(false);
   const toastTimerRef = useRef(null);
 
@@ -142,7 +142,7 @@ const useToast = () => {
   return { showToast, handleShowToast };
 };
 
-const useDelivererLayout = () => {
+function useDelivererLayout() {
   const { userData } = useSelector((state) => state.user);
   const location = useLocation();
   const navigate = useNavigate();
@@ -422,7 +422,7 @@ const useDelivererLayout = () => {
   };
 };
 
-const DeliveryLayout = ({ children }) => {
+export default function DeliveryLayout({ children }) {
   const {
     visibleDeliveries,
     triggerRefresh,
@@ -598,6 +598,4 @@ const DeliveryLayout = ({ children }) => {
       </div>
     </DelivererDataContext.Provider>
   );
-};
-
-export default DeliveryLayout;
+}
