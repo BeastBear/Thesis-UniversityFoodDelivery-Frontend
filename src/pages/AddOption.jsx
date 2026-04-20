@@ -16,7 +16,7 @@ import Card from "../components/ui/Card";
 import PrimaryButton from "../components/ui/PrimaryButton";
 import EmptyState from "../components/ui/EmptyState";
 
-function AddOption() {
+function AddOption({ isModal = false, onOptionSaved = null, onClose = null }) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const editId = searchParams.get("edit");
@@ -167,9 +167,10 @@ function AddOption() {
     setLoading(true);
 
     try {
+      let response;
       if (editId) {
         // Update existing option
-        await axios.put(
+        response = await axios.put(
           `${serverUrl}/api/option-template/${editId}`,
           {
             nameThai: "",
@@ -182,7 +183,7 @@ function AddOption() {
         );
       } else {
         // Create new option
-        await axios.post(
+        response = await axios.post(
           `${serverUrl}/api/option-template`,
           {
             nameThai: "",
@@ -199,7 +200,12 @@ function AddOption() {
       toast.success(
         editId ? "Option updated successfully!" : "Option saved successfully!",
       );
-      navigate(-1);
+      
+      if (isModal && onOptionSaved) {
+        onOptionSaved(response.data);
+      } else {
+        navigate(-1);
+      }
     } catch (error) {
       setLoading(false);
 
@@ -221,7 +227,11 @@ function AddOption() {
       <div className="bg-white shadow-sm sticky top-0 z-10">
         <div className="flex items-center gap-4 p-4">
           <button
-            onClick={() => navigate(-1)}
+            type="button"
+            onClick={() => {
+              if (isModal && onClose) onClose();
+              else navigate(-1);
+            }}
             className="p-2 hover:bg-gray-100 rounded-full">
             <IoIosArrowRoundBack size={24} className="text-gray-700" />
           </button>

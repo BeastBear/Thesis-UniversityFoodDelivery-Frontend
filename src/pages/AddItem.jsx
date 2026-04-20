@@ -11,6 +11,7 @@ import { toast } from "react-toastify";
 import Card from "../components/ui/Card";
 import PrimaryButton from "../components/ui/PrimaryButton";
 import EmptyState from "../components/ui/EmptyState";
+import AddOption from "./AddOption";
 
 function AddItem() {
   const navigate = useNavigate();
@@ -37,6 +38,7 @@ function AddItem() {
   const [optionTemplates, setOptionTemplates] = useState([]);
   const [showOptionModal, setShowOptionModal] = useState(false);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const [showCreateOptionModal, setShowCreateOptionModal] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
   const [creatingCategory, setCreatingCategory] = useState(false);
   const fileInputRef = useRef(null);
@@ -359,7 +361,7 @@ function AddItem() {
             </button>
             <button
               type="button"
-              onClick={() => navigate("/add-option")}
+              onClick={() => setShowCreateOptionModal(true)}
               className="px-4 py-3 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 transition-colors">
               <span className="text-sm">Create New</span>
             </button>
@@ -563,7 +565,7 @@ function AddItem() {
                       type="button"
                       onClick={() => {
                         setShowOptionModal(false);
-                        navigate("/add-option");
+                        setShowCreateOptionModal(true);
                       }}>
                       Create Option
                     </PrimaryButton>
@@ -645,6 +647,30 @@ function AddItem() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Create Option Modal */}
+      {showCreateOptionModal && (
+        <div className="fixed inset-0 bg-black/50 flex flex-col z-50 overflow-hidden">
+          <div className="flex justify-end p-4">
+            <button
+              onClick={() => setShowCreateOptionModal(false)}
+              className="bg-white p-2 text-gray-800 rounded-full w-10 h-10 flex items-center justify-center hover:bg-gray-100 transition-colors shadow-lg">
+              <FaTimes />
+            </button>
+          </div>
+          <div className="flex-1 overflow-y-auto bg-gray-100 rounded-t-2xl shadow-2xl relative border-t border-gray-200">
+            <AddOption
+              isModal={true}
+              onOptionSaved={(newOption) => {
+                setOptionTemplates((prev) => [...prev, newOption]);
+                setSelectedOptionTemplates((prev) => [...prev, newOption._id]);
+                setShowCreateOptionModal(false);
+              }}
+              onClose={() => setShowCreateOptionModal(false)}
+            />
           </div>
         </div>
       )}
