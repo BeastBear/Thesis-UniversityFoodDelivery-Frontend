@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { IoIosArrowRoundBack } from "react-icons/io";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { FaPlus, FaTimes, FaStar, FaCamera } from "react-icons/fa";
+import { FaPlus, FaTimes, FaStar, FaCamera, FaChevronDown, FaChevronUp } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import { serverUrl } from "../config";
@@ -40,6 +40,14 @@ function AddItem() {
   const [newCategoryName, setNewCategoryName] = useState("");
   const [creatingCategory, setCreatingCategory] = useState(false);
   const fileInputRef = useRef(null);
+  const [expandedOptions, setExpandedOptions] = useState({});
+
+  const toggleOptionExpand = (templateId) => {
+    setExpandedOptions((prev) => ({
+      ...prev,
+      [templateId]: !prev[templateId],
+    }));
+  };
 
   // Fetch categories and option templates
   useEffect(() => {
@@ -359,20 +367,54 @@ function AddItem() {
                 );
                 if (!template) return null;
                 return (
-                  <div
-                    key={templateId}
-                    className="p-3 bg-white rounded-lg flex items-center justify-between">
-                    <span className="text-sm text-gray-700">
-                      {template.nameEnglish ||
-                        template.nameThai ||
-                        "Untitled Option"}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => toggleOptionTemplate(templateId)}
-                      className="text-red-500 hover:text-red-700">
-                      <FaTimes size={14} />
-                    </button>
+                  <div key={templateId} className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                    <div
+                      className="p-3 flex items-center justify-between cursor-pointer hover:bg-gray-50 transition-colors"
+                      onClick={() => toggleOptionExpand(templateId)}>
+                      <div className="flex items-center gap-2">
+                        {expandedOptions[templateId] ? (
+                          <FaChevronUp className="text-gray-400" size={12} />
+                        ) : (
+                          <FaChevronDown className="text-gray-400" size={12} />
+                        )}
+                        <span className="text-sm font-medium text-gray-700">
+                          {template.nameEnglish ||
+                            template.nameThai ||
+                            "Untitled Option"}
+                        </span>
+                        <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full border border-gray-200">
+                          {template.choices?.length || 0} choices
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleOptionTemplate(templateId);
+                        }}
+                        className="text-red-500 hover:text-red-700 p-1 bg-white rounded-md hover:bg-red-50 transition-colors">
+                        <FaTimes size={14} />
+                      </button>
+                    </div>
+                    {expandedOptions[templateId] && template.choices && template.choices.length > 0 && (
+                      <div className="bg-gray-50/80 p-3 pt-2 border-t border-gray-100 space-y-2">
+                        {template.choices.map((choice, i) => (
+                          <div key={i} className="flex justify-between items-center text-sm ml-6 mr-2">
+                            <span className="text-gray-600 flex items-center gap-2">
+                              <span className="w-1.5 h-1.5 rounded-full bg-gray-300"></span>
+                              {choice.name}
+                            </span>
+                            <span className="text-gray-500 font-medium whitespace-nowrap ml-2">
+                              {choice.priceType === "increase"
+                                ? `+฿${choice.price}`
+                                : choice.priceType === "decrease"
+                                  ? `-฿${choice.price}`
+                                  : "Free"}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 );
               })}
