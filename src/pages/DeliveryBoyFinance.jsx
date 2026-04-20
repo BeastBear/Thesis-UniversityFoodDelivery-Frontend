@@ -449,10 +449,25 @@ function DeliveryBoyFinanceContent() {
           );
           setPollingClientSecret(clientSecret);
         } else if (paymentIntent && paymentIntent.status === "succeeded") {
-          toast.success("Top up successful!");
+          // ✅ Call verify endpoint to update credit in database
+          try {
+            const verifyRes = await axios.post(
+              `${serverUrl}/api/user/verify-credit-topup`,
+              { paymentIntentId: paymentIntent.id },
+              { withCredentials: true }
+            );
+            // Update Redux with new credit
+            if (verifyRes.data.newCredit !== undefined && userData) {
+              dispatch(setUserData({ ...userData, jobCredit: verifyRes.data.newCredit }));
+            }
+            toast.success("Top up successful!");
+          } catch (err) {
+            console.error("Failed to verify top up:", err);
+            toast.error("Payment succeeded but credit update failed. Please refresh.");
+          }
           setShowTopUpModal(false);
           setTopUpAmount("");
-          fetchFinancialData();
+          setTimeout(() => fetchFinancialData(), 1000);
         }
       } else {
         if (!stripeInstance || !elements) return;
@@ -477,10 +492,25 @@ function DeliveryBoyFinanceContent() {
         if (error) {
           toast.error(error.message);
         } else if (paymentIntent && paymentIntent.status === "succeeded") {
-          toast.success("Top up successful!");
+          // ✅ Call verify endpoint to update credit in database
+          try {
+            const verifyRes = await axios.post(
+              `${serverUrl}/api/user/verify-credit-topup`,
+              { paymentIntentId: paymentIntent.id },
+              { withCredentials: true }
+            );
+            // Update Redux with new credit
+            if (verifyRes.data.newCredit !== undefined && userData) {
+              dispatch(setUserData({ ...userData, jobCredit: verifyRes.data.newCredit }));
+            }
+            toast.success("Top up successful!");
+          } catch (err) {
+            console.error("Failed to verify top up:", err);
+            toast.error("Payment succeeded but credit update failed. Please refresh.");
+          }
           setShowTopUpModal(false);
           setTopUpAmount("");
-          fetchFinancialData();
+          setTimeout(() => fetchFinancialData(), 1000);
         }
       }
     } catch (error) {
