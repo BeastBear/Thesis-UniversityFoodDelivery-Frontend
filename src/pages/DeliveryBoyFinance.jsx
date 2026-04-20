@@ -241,18 +241,22 @@ function DeliveryBoyFinanceContent() {
             setShowTopUpModal(false);
             setTopUpAmount("");
             try {
-              await axios.post(
+              const verifyRes = await axios.post(
                 `${serverUrl}/api/user/verify-credit-topup`,
                 { paymentIntentId: paymentIntent.id },
                 { withCredentials: true },
               );
+              // Immediately update Redux with the returned credit
+              if (verifyRes.data.newCredit !== undefined && userData) {
+                dispatch(setUserData({ ...userData, jobCredit: verifyRes.data.newCredit }));
+              }
               toast.success("Top up successful!");
             } catch (err) {
               console.error("Failed to verify top up:", err);
               toast.error("Stripe payment succeeded, but top up verification failed.");
             }
 
-            fetchFinancialData();
+            setTimeout(() => fetchFinancialData(), 1000);
             navigate("/delivery-boy-finance", { replace: true });
           }
         } catch (error) {
@@ -384,10 +388,14 @@ function DeliveryBoyFinanceContent() {
         );
 
         if (response.data.status === "succeeded") {
+          // Immediately update Redux with the new credit from backend
+          if (response.data.newCredit !== undefined && userData) {
+            dispatch(setUserData({ ...userData, jobCredit: response.data.newCredit }));
+          }
           toast.success("Top up successful!");
           setShowTopUpModal(false);
           setTopUpAmount("");
-          fetchFinancialData();
+          setTimeout(() => fetchFinancialData(), 1000);
         } else if (response.data.status === "requires_action") {
           const { error, paymentIntent } =
             await stripeInstance.handleNextAction({
@@ -397,15 +405,19 @@ function DeliveryBoyFinanceContent() {
           if (error) {
             toast.error(error.message);
           } else if (paymentIntent && paymentIntent.status === "succeeded") {
-            await axios.post(
+            const verifyRes = await axios.post(
               `${serverUrl}/api/user/verify-credit-topup`,
               { paymentIntentId: paymentIntent.id },
               { withCredentials: true },
             );
+            // Immediately update Redux with new credit
+            if (verifyRes.data.newCredit !== undefined && userData) {
+              dispatch(setUserData({ ...userData, jobCredit: verifyRes.data.newCredit }));
+            }
             toast.success("Top up successful!");
             setShowTopUpModal(false);
             setTopUpAmount("");
-            fetchFinancialData();
+            setTimeout(() => fetchFinancialData(), 1000);
           }
         }
       } else if (topUpPaymentMethod === "promptpay") {
