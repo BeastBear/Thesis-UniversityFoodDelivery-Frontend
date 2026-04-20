@@ -240,6 +240,17 @@ function DeliveryBoyFinanceContent() {
             setPromptPayQrUrl("");
             setShowTopUpModal(false);
             setTopUpAmount("");
+            
+            try {
+              await axios.post(
+                `${serverUrl}/api/user/verify-credit-topup`,
+                { paymentIntentId: paymentIntent.id },
+                { withCredentials: true },
+              );
+            } catch (err) {
+              console.error("Failed to verify top up:", err);
+            }
+
             toast.success("Top up successful!");
             fetchFinancialData();
             navigate("/delivery-boy-finance", { replace: true });
