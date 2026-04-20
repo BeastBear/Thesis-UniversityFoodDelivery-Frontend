@@ -240,18 +240,18 @@ function DeliveryBoyFinanceContent() {
             setPromptPayQrUrl("");
             setShowTopUpModal(false);
             setTopUpAmount("");
-            
             try {
               await axios.post(
                 `${serverUrl}/api/user/verify-credit-topup`,
                 { paymentIntentId: paymentIntent.id },
                 { withCredentials: true },
               );
+              toast.success("Top up successful!");
             } catch (err) {
               console.error("Failed to verify top up:", err);
+              toast.error("Stripe payment succeeded, but top up verification failed.");
             }
 
-            toast.success("Top up successful!");
             fetchFinancialData();
             navigate("/delivery-boy-finance", { replace: true });
           }
