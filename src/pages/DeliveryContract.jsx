@@ -3,7 +3,6 @@ import { useSelector } from "react-redux";
 import axios from "axios";
 import { serverUrl } from "../config";
 import { FaFileContract } from "react-icons/fa";
-import DeliveryLayout from "../layouts/DeliveryLayout";
 import DeliveryPageHero from "../components/Delivery/DeliveryPageHero";
 import { useNavigate } from "react-router-dom";
 
@@ -97,7 +96,7 @@ function DeliveryContract() {
 
 
   return (
-    <DeliveryLayout>
+    <div className="w-full relative min-h-screen">
       <div className="w-full max-w-[900px] mx-auto flex flex-col px-4 pt-3 sm:pt-6 gap-3 sm:gap-6 pb-28">
         <DeliveryPageHero
           eyebrow="DELIVERER"
@@ -280,7 +279,7 @@ function DeliveryContract() {
           </div>
         </div>
       </div>
-    </DeliveryLayout>
+    </div>
   );
 }
 

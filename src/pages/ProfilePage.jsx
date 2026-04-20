@@ -15,7 +15,6 @@ import {
   FaInfoCircle,
   FaIdCard,
 } from "react-icons/fa";
-import DeliveryLayout from "../layouts/DeliveryLayout";
 import DeliveryPageHero from "../components/Delivery/DeliveryPageHero";
 
 function ProfilePage() {
@@ -323,9 +322,12 @@ function ProfilePage() {
     </div>
   );
 
-  // For delivery boys, use DeliveryLayout
   if (isDeliveryBoy) {
-    return <DeliveryLayout>{content}</DeliveryLayout>;
+    return (
+      <div className="w-full min-h-screen">
+        {content}
+      </div>
+    );
   }
 
   // For regular users, return content without wrapper (ProfileLayout will handle it)

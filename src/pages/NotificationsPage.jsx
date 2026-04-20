@@ -2,7 +2,6 @@ import React from "react";
 import useNotifications from "../hooks/useNotifications";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import DeliveryLayout from "../layouts/DeliveryLayout";
 import UserNotificationsView from "../components/Notifications/UserNotificationsView";
 import ShopNotificationsView from "../components/Notifications/ShopNotificationsView";
 import DelivererNotificationsView from "../components/Notifications/DelivererNotificationsView";
@@ -72,15 +71,16 @@ const NotificationsPage = () => {
     navigate,
   };
 
-  // Render role-specific notification views
   if (role === "deliveryBoy") {
     return (
-      <DeliveryLayout>
-        <DelivererNotificationsView
-          {...commonProps}
-          userData={userData}
-        />
-      </DeliveryLayout>
+      <div className="w-full min-h-screen font-sans flex flex-col">
+        <div className="flex-1 w-full pb-safe safe-area-bottom">
+          <DelivererNotificationsView
+            {...commonProps}
+            userData={userData}
+          />
+        </div>
+      </div>
     );
   }
 

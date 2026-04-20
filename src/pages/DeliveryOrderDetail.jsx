@@ -5,7 +5,6 @@ import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { MdRoute } from "react-icons/md";
 import { serverUrl } from "../config";
-import DeliveryLayout from "../layouts/DeliveryLayout";
 import DeliveryPageHero from "../components/Delivery/DeliveryPageHero";
 
 function DeliveryOrderDetail() {
@@ -73,7 +72,7 @@ function DeliveryOrderDetail() {
 
   if (!order) {
     return (
-      <DeliveryLayout>
+      <div className="w-full relative min-h-screen">
         <div className="w-full max-w-[900px] mx-auto flex flex-col px-4 pt-3 sm:pt-6 gap-3 sm:gap-6 pb-28">
           <DeliveryPageHero
             eyebrow="ORDER"
@@ -86,12 +85,12 @@ function DeliveryOrderDetail() {
             Please go back and try again.
           </div>
         </div>
-      </DeliveryLayout>
+      </div>
     );
   }
 
   return (
-    <DeliveryLayout>
+    <div className="w-full relative min-h-screen">
       <div className="w-full max-w-[900px] mx-auto flex flex-col px-4 pt-3 sm:pt-6 gap-3 sm:gap-6 pb-28">
         <DeliveryPageHero
           eyebrow="ORDER"
@@ -178,7 +177,7 @@ function DeliveryOrderDetail() {
           </div>
         </div>
       </div>
-    </DeliveryLayout>
+    </div>
   );
 }
 

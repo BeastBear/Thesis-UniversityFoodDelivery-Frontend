@@ -5,7 +5,6 @@ import axios from "axios";
 import { serverUrl } from "../config";
 import { FaHome, FaUtensils, FaWalking } from "react-icons/fa";
 import { MdRoute } from "react-icons/md";
-import DeliveryLayout from "../layouts/DeliveryLayout";
 import DeliveryPageHero from "../components/Delivery/DeliveryPageHero";
 
 // Calculate distance between two coordinates using Haversine formula (in kilometers)
@@ -68,7 +67,7 @@ function DeliveryBoyJobDetails() {
 
   if (!currentOrder) {
     return (
-      <DeliveryLayout>
+      <div className="w-full relative min-h-screen">
         <div className="w-full max-w-[900px] mx-auto px-4 py-10 sm:py-14 flex flex-col items-center gap-6 text-center">
           <div className="w-16 h-16 rounded-2xl bg-blue-50 text-blue-700 flex items-center justify-center shadow-sm">
             <FaWalking size={28} />
@@ -93,7 +92,7 @@ function DeliveryBoyJobDetails() {
             <span>Back to Home</span>
           </button>
         </div>
-      </DeliveryLayout>
+      </div>
     );
   }
 
@@ -119,7 +118,7 @@ function DeliveryBoyJobDetails() {
   const deliveryFee = currentOrder?.deliveryFee || 0;
 
   return (
-    <DeliveryLayout>
+    <div className="w-full relative min-h-screen">
       <div className="w-full max-w-[900px] mx-auto flex flex-col px-4 pt-3 sm:pt-6 gap-3 sm:gap-6 pb-28">
         <DeliveryPageHero
           eyebrow="DELIVERER JOB"
@@ -261,7 +260,7 @@ function DeliveryBoyJobDetails() {
           </div>
         </div>
       </div>
-    </DeliveryLayout>
+    </div>
   );
 }
 

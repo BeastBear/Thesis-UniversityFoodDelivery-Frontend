@@ -8,7 +8,6 @@ import axios from "axios";
 import { serverUrl } from "../config";
 import { FaFileInvoiceDollar } from "react-icons/fa";
 import { toast } from "react-toastify";
-import DeliveryLayout from "../layouts/DeliveryLayout";
 import DeliveryPageHero from "../components/Delivery/DeliveryPageHero";
 
 function IncomeSummary() {
@@ -313,7 +312,7 @@ function IncomeSummary() {
   }
 
   return (
-    <DeliveryLayout>
+    <div className="w-full relative min-h-screen">
       <div className="w-full max-w-[900px] mx-auto flex flex-col px-4 pt-3 sm:pt-6 gap-3 sm:gap-6 pb-28">
         <DeliveryPageHero
           eyebrow="DELIVERER FINANCE"
@@ -552,7 +551,7 @@ function IncomeSummary() {
           )}
         </div>
       </div>
-    </DeliveryLayout>
+    </div>
   );
 }
 
