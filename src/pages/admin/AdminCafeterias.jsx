@@ -143,6 +143,12 @@ const AdminCafeterias = () => {
     updatedCafeterias[index] = {
       ...updatedCafeterias[index],
       zoneId: zoneId || null,
+      // If zone changes, reset coordinates to 0,0 so backend can recalculate center
+      location: {
+        ...updatedCafeterias[index].location,
+        lat: 0,
+        lng: 0,
+      },
     };
 
     try {
@@ -152,9 +158,38 @@ const AdminCafeterias = () => {
         { withCredentials: true },
       );
       setSettings(res.data);
-      toast.success("Cafeteria zone updated");
+      toast.success("Cafeteria zone updated. Coordinates will be auto-calculated.");
     } catch (error) {
       toast.error("Failed to save cafeteria zone");
+    }
+  };
+
+  const handleLocationChange = async (index, field, value) => {
+    const updatedCafeterias = [...(settings?.cafeteriaSettings || [])];
+    const currentLocation = { ...(updatedCafeterias[index].location || { lat: 0, lng: 0, address: "" }) };
+    
+    updatedCafeterias[index] = {
+      ...updatedCafeterias[index],
+      location: {
+        ...currentLocation,
+        [field]: value
+      }
+    };
+
+    // Optimization: for lat/lng, we only save if it's a valid number or empty string
+    if (field === 'lat' || field === 'lng') {
+      if (value !== '' && isNaN(parseFloat(value))) return;
+    }
+
+    try {
+      const res = await axios.put(
+        `${serverUrl}/api/admin/settings`,
+        { cafeteriaSettings: updatedCafeterias },
+        { withCredentials: true },
+      );
+      setSettings(res.data);
+    } catch (error) {
+      toast.error("Failed to save location data");
     }
   };
 
@@ -335,26 +370,64 @@ const AdminCafeterias = () => {
             </div>
 
             <div className="flex flex-col gap-2">
-              <div className="text-xs font-bold uppercase tracking-wide text-gray-500">
-                Zone
+              <div className="text-xs font-bold uppercase tracking-wide text-gray-400">
+                Location Configuration
               </div>
-              <select
-                className="w-full px-3 py-2 rounded-xl border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
-                value={
-                  typeof cafeteria.zoneId === "object" && cafeteria.zoneId
-                    ? cafeteria.zoneId._id || ""
-                    : cafeteria.zoneId || ""
-                }
-                onChange={(e) =>
-                  handleCafeteriaZoneChange(index, e.target.value)
-                }>
-                <option value="">No Zone</option>
-                {zones.map((z) => (
-                  <option key={z._id} value={z._id}>
-                    {z.name}
-                  </option>
-                ))}
-              </select>
+              
+              <div className="space-y-3 p-3 bg-gray-50 rounded-xl border border-gray-100">
+                <div className="flex flex-col gap-1">
+                  <span className="text-[10px] font-bold text-gray-500 uppercase">Zone</span>
+                  <select
+                    className="w-full px-3 py-1.5 rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs"
+                    value={
+                      typeof cafeteria.zoneId === "object" && cafeteria.zoneId
+                        ? cafeteria.zoneId._id || ""
+                        : cafeteria.zoneId || ""
+                    }
+                    onChange={(e) =>
+                      handleCafeteriaZoneChange(index, e.target.value)
+                    }>
+                    <option value="">No Zone</option>
+                    {zones.map((z) => (
+                      <option key={z._id} value={z._id}>
+                        {z.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[10px] font-bold text-gray-500 uppercase">Latitude</span>
+                    <input 
+                      type="text"
+                      className="w-full px-3 py-1.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs"
+                      value={cafeteria.location?.lat ?? 0}
+                      onChange={(e) => handleLocationChange(index, 'lat', e.target.value)}
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[10px] font-bold text-gray-500 uppercase">Longitude</span>
+                    <input 
+                      type="text"
+                      className="w-full px-3 py-1.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs"
+                      value={cafeteria.location?.lng ?? 0}
+                      onChange={(e) => handleLocationChange(index, 'lng', e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <span className="text-[10px] font-bold text-gray-500 uppercase">Address / Note</span>
+                  <input 
+                    type="text"
+                    placeholder="e.g. Building 10, Floor 1"
+                    className="w-full px-3 py-1.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs"
+                    value={cafeteria.location?.address || ""}
+                    onChange={(e) => handleLocationChange(index, 'address', e.target.value)}
+                  />
+                </div>
+              </div>
             </div>
           </div>
         ))}
