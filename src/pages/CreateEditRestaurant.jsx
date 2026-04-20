@@ -60,8 +60,8 @@ function CreateEditRestaurant() {
   const [backendImage, setBackendImage] = useState(null);
   const [loading, setLoading] = useState(false);
   const [location, setLocation] = useState({
-    lat: myShopData?.location?.latitude || 13.7563,
-    lon: myShopData?.location?.longitude || 100.5018,
+    lat: myShopData?.location?.latitude || null,
+    lon: myShopData?.location?.longitude || null,
   });
   const [addressInput, setAddressInput] = useState(myShopData?.address || "");
   const [note, setNote] = useState(
@@ -365,8 +365,10 @@ function CreateEditRestaurant() {
       if (category) {
         formData.append("category", category);
       }
-      formData.append("latitude", location.lat);
-      formData.append("longitude", location.lon);
+      if (location.lat !== null && location.lon !== null) {
+        formData.append("latitude", location.lat);
+        formData.append("longitude", location.lon);
+      }
       formData.append("address", addressInput);
       formData.append("note", note);
       formData.append("shopNumber", shopNumber);
