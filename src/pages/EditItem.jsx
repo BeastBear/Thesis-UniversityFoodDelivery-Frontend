@@ -75,10 +75,15 @@ function EditItem() {
       setNameEnglish(item.nameEnglish || "");
       setPrice(item.onlinePrice || item.inStorePrice || item.price || 0);
       setFrontendImage(item.image || null);
-      setSelectedCategories(
-        item.categories || (item.categoryRef ? [item.categoryRef] : []) || [],
+      // Normalize categories and option templates to just their IDs
+      const normCats = (item.categories || []).map((c) => c?._id || c);
+      if (normCats.length === 0 && item.categoryRef) {
+        normCats.push(item.categoryRef?._id || item.categoryRef);
+      }
+      setSelectedCategories(normCats);
+      setSelectedOptionTemplates(
+        (item.selectedOptionTemplates || []).map((tpl) => tpl?._id || tpl),
       );
-      setSelectedOptionTemplates(item.selectedOptionTemplates || []);
       setIsRecommended(item.isRecommended || false);
       setDescription(item.descriptionEnglish || item.descriptionThai || "");
     } catch (error) {

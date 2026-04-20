@@ -76,8 +76,13 @@ function AddItem() {
       setNameEnglish(item.nameEnglish || "");
       setPrice(item.onlinePrice || item.inStorePrice || item.price || "");
       setFrontendImage(item.image || null);
-      setSelectedCategories(item.categories || [item.categoryRef] || []);
-      // Normalize option templates to just their IDs (API returns populated objects)
+      // Normalize categories and option templates to just their IDs
+      const normCats = (item.categories || []).map((c) => c?._id || c);
+      if (normCats.length === 0 && item.categoryRef) {
+        normCats.push(item.categoryRef?._id || item.categoryRef);
+      }
+      setSelectedCategories(normCats);
+
       setSelectedOptionTemplates(
         (item.selectedOptionTemplates || []).map((tpl) => tpl?._id || tpl),
       );
