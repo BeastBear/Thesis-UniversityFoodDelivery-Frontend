@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
+import useCafeterias from "../hooks/useCafeterias";
 
 import RestaurantListingCard from "../components/RestaurantListingCard";
 import { setCurrentCafeteria } from "../redux/userSlice";
 import { IoIosArrowBack } from "react-icons/io";
 import { checkBusinessHours } from "../utils/checkBusinessHours";
+import { DELIVERY_CONFIG } from "../config/constants";
 
 function CafeteriaPage() {
   const { cafeteriaName } = useParams();
@@ -14,6 +16,8 @@ function CafeteriaPage() {
   const { shopsInMyCity, userData, currentCafeteria } = useSelector(
     (state) => state.user
   );
+  
+  const { cafeteriaLocations, pricePerKm, baseDeliveryFee } = useCafeterias();
 
   // Update global cafeteria state when visiting this page
   useEffect(() => {
@@ -52,19 +56,50 @@ function CafeteriaPage() {
         {shopsInMyCity && shopsInMyCity.length > 0 ? (
           <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {shopsInMyCity.map((shop) => {
-              // Calculate distance
-              let distance = null;
-              if (userData?.location?.coordinates && shop?.location) {
-                distance = calculateDistance(
-                  userData.location.coordinates[1],
-                  userData.location.coordinates[0],
-                  shop.location.latitude,
-                  shop.location.longitude
-                );
+              // Priority: Default Address -> First Saved Address -> GPS
+              const savedAddresses = userData?.savedAddresses || [];
+              const defaultAddress = savedAddresses.find((a) => a.isDefault);
+              const targetAddress = defaultAddress || savedAddresses[0];
+
+              const userLat =
+                targetAddress?.location?.lat ||
+                userData?.location?.coordinates?.[1];
+              const userLon =
+                targetAddress?.location?.lon ||
+                userData?.location?.coordinates?.[0];
+
+              // Priority: Shop location -> Shop's Cafe Location -> Default
+              let shopLat = shop?.location?.latitude;
+              let shopLon = shop?.location?.longitude;
+
+              if (!shopLat || !shopLon) {
+                const shopCafe = shop?.cafeteria;
+                if (shopCafe && cafeteriaLocations?.[shopCafe]) {
+                  shopLat = cafeteriaLocations[shopCafe].lat;
+                  shopLon = cafeteriaLocations[shopCafe].lon;
+                }
               }
 
-              // Mock duration
-              const duration = distance ? distance * 2 + 10 : 20;
+              let distance = null;
+              if (shopLat && shopLon && userLat && userLon) {
+                distance = calculateDistance(shopLat, shopLon, userLat, userLon);
+              }
+
+              // Mock duration and fee logic sync with dashboard
+              const duration = distance ? Math.round(distance * 2 + 10) : null;
+              const deliveryFee = (() => {
+                if (
+                  !distance ||
+                  distance > DELIVERY_CONFIG.MAX_DELIVERY_DISTANCE_KM
+                )
+                  return null;
+                const rate =
+                  pricePerKm !== undefined && pricePerKm !== null
+                    ? pricePerKm
+                    : DELIVERY_CONFIG.NORMAL_HOUR_RATE;
+                const base = baseDeliveryFee || 0;
+                return Math.floor(base + distance * rate);
+              })();
 
               return (
                 <RestaurantListingCard
@@ -72,7 +107,7 @@ function CafeteriaPage() {
                   data={shop}
                   distance={distance}
                   duration={duration}
-                  deliveryFee={0} // Mock fee
+                  deliveryFee={deliveryFee}
                   onClick={() => navigate(`/restaurant/${shop._id}`)}
                 />
               );
