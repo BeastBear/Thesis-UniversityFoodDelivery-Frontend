@@ -284,9 +284,9 @@ function SavedAddresses() {
 
   return (
     <div className="min-h-screen bg-white pb-12">
-      {/* Mobile Header */}
+      {/* Header */}
       <div className="max-w-5xl mx-auto px-4 lg:px-8">
-        <div className="lg:hidden pt-4 pb-2 flex justify-end">
+        <div className="pt-4 pb-4 flex justify-end">
           <PrimaryButton
             onClick={handleAddNew}
             className="px-5 py-2.5 flex items-center gap-2">
